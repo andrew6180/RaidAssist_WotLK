@@ -1,0 +1,38 @@
+## Interface: 30300
+## Title: Raid Assist
+## Notes: Mods and Tools for raiding, type /raa to see.
+## SavedVariables: IskarAssistDB, RADataBase
+
+#@no-lib-strip@
+Libs\libs.xml
+#@end-no-lib-strip@
+
+gl\gl2.lua
+
+locales\enUS.lua
+
+RaidAssist.lua
+Templates.lua
+OptionsAnchor.lua
+OptionsPanel.lua
+API.lua
+Loot.lua
+
+plugins\raidschedule.lua
+plugins\attendance.lua
+plugins\battleres.lua
+plugins\cooldowns.lua
+plugins\playercheck.lua
+plugins\bislist.lua
+plugins\raidbislist.lua
+plugins\invite.lua
+plugins\notes.lua
+plugins\raidgroups.lua
+plugins\readycheck.lua
+plugins\toolbar.lua
+plugins\addonscheck.lua
+plugins\aurachecker.lua
+plugins\aurabank.lua
+plugins\pastetext.lua
+
+indent.lua
