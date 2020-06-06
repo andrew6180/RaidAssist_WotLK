@@ -1191,8 +1191,8 @@ function Invite:SendInviteAnnouncementMsg()
 		msg = Invite.db.invite_msg
 	end
 	
-	print("[GUILD] " .. msg)
-	--SendChatMessage (Invite.db.invite_msg, "GUILD")
+	--print("[GUILD] " .. msg)
+	SendChatMessage (Invite.db.invite_msg, "GUILD")
 end
 
 
