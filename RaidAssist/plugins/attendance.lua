@@ -31,8 +31,8 @@ Attendance.debug = false
 
 local RaidSchedule
 
-local icon_texcoord = {l=50/512, r=86/512, t=362/512, b=406/512}
-local icon_texture = [[Interface\Scenarios\ScenariosParts]]
+local icon_texcoord = {l=0, r=1, t=0, b=1}
+local icon_texture = "Interface\\AddOns\\" .. RA.InstallDir .. "\\media\\attendance_flag"
 local text_color_enabled = {r=1, g=1, b=1, a=1}
 local text_color_disabled = {r=0.5, g=0.5, b=0.5, a=1}
 

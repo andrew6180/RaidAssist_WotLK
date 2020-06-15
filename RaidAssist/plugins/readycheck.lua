@@ -15,9 +15,10 @@ local default_config = {
 	text_shadow = false,
 }
 
-local icon_texcoord = {l=0.078125, r=0.921875, t=0.078125, b=0.921875}
+local icon_texcoord = {l=64/512, r=96/512, t=0, b=1}
 local text_color_enabled = {r=1, g=1, b=1, a=1}
 local text_color_disabled = {r=0.5, g=0.5, b=0.5, a=1}
+local icon_texture = "Interface\\AddOns\\" .. RA.InstallDir .. "\\media\\plugin_icons"
 
 if (_G ["RaidAssistReadyCheck"]) then
 	return
@@ -29,9 +30,9 @@ ReadyCheck.debug = false
 
 ReadyCheck.menu_text = function (plugin)
 	if (ReadyCheck.db.enabled) then
-		return [[Interface\Scenarios\ScenarioIcon-Check]], icon_texcoord, "Ready Check", text_color_enabled
+		return icon_texture, icon_texcoord, "Ready Check", text_color_enabled
 	else
-		return [[Interface\Scenarios\ScenarioIcon-Check]], icon_texcoord, "Ready Check", text_color_disabled
+		return icon_texture, icon_texcoord, "Ready Check", text_color_disabled
 	end
 end
 

@@ -28,14 +28,18 @@ local default_config = {
 local Roll = {version = "v0.1", pluginname = "Roll Handler"}
 _G ["RaidAssistRoll"] = Roll
 
+local icon_texcoord = {l=0, r=1, t=0, b=1}
+local text_color_enabled = {r=1, g=1, b=1, a=1}
+local text_color_disabled = {r=0.5, g=0.5, b=0.5, a=1}
+local icon_texture = [[Interface\Buttons\UI-GroupLoot-Dice-Up]]
 
 Roll.debug = false
 
 Roll.menu_text = function (plugin)
 	if (Roll.db.enabled) then
-		return [[Interface\Scenarios\ScenarioIcon-Check]], icon_texcoord, "Roll Handler", text_color_enabled
+		return icon_texture, icon_texcoord, "Roll Handler", text_color_enabled
 	else
-		return [[Interface\Scenarios\ScenarioIcon-Check]], icon_texcoord, "Roll Handler", text_color_disabled
+		return icon_texture, icon_texcoord, "Roll Handler", text_color_disabled
 	end
 end
 
