@@ -125,7 +125,7 @@ local get_unit_name = function (unitid)
 end
 
 function Cooldowns:COMBAT_LOG_EVENT_UNFILTERED(self, time, event, who_guid, who_name, who_flags, target_guid, targeT_name, target_flags, spellid, ...)
-	if event == "SPELL_CAST_SUCCESS" then 
+	if event == "SPELL_CAST_SUCCESS" or "SPELL_RESURRECT" then 
 		Cooldowns.HandleSpellCast (event, who_name, who_guid, spellid)
 	end
 end
@@ -317,6 +317,7 @@ local panel_prototype = {
 	enabled = false,
 	cooldowns_raid = true,
 	cooldowns_external = true,
+	grow_inverse = false,
 }
 
 function Cooldowns.CheckValues (panel)
@@ -325,7 +326,8 @@ end
 
 local in_the_group = {}
 
-function Cooldowns:LibGroupInSpecT_UpdateReceived()
+
+function Cooldowns:LibGroupTalents_Update()
 	Cooldowns.RosterUpdate()
 end
 
@@ -375,35 +377,24 @@ end
 function Cooldowns.CheckUnitCooldowns (unitID, groupType, groupIndex)
 
 	local guid = UnitGUID (unitID)
-	local info = LibGroupInSpecT:GetCachedInfo (guid) 
-	if not info then
-		info = {}
-		info.class = select(2, UnitClass(unitID))
-		if not info.class then
-			return -- exit we're checking class too early
-		end
-		info.class_id = DF.ClassFileNameToIndex[info.class]
-		local _, t1, t2, t3 = LibGroupTalents:GetGUIDTalentSpec(guid)
-		if t1 and t2 and t3 then 
-			if t1 > t2 and t1 > t3 then
-				info.global_spec_id = DF:GetClassSpecIDs(info.class)[1]
-			elseif t2 > t1 and t2 > t3 then
-				info.global_spec_id = DF:GetClassSpecIDs(info.class)[2]
-			elseif t3 > t1 and t3 > t2 then 
-				info.global_spec_id = DF:GetClassSpecIDs(info.class)[3]
-			end
-		else
+	info = {}
+	info.class = select(2, UnitClass(unitID))
+	if not info.class then
+		return -- exit we're checking class too early
+	end
+	info.class_id = DF.ClassFileNameToIndex[info.class]
+	local _, t1, t2, t3 = LibGroupTalents:GetGUIDTalentSpec(guid)
+	if t1 and t2 and t3 then 
+		if t1 > t2 and t1 > t3 then
 			info.global_spec_id = DF:GetClassSpecIDs(info.class)[1]
+		elseif t2 > t1 and t2 > t3 then
+			info.global_spec_id = DF:GetClassSpecIDs(info.class)[2]
+		elseif t3 > t1 and t3 > t2 then 
+			info.global_spec_id = DF:GetClassSpecIDs(info.class)[3]
 		end
-	end
-
-	if not info.class_id then 
-		info.class_id = DF.ClassFileNameToIndex[info.class]
-	end
-
-	if not info.global_spec_id or info.global_spec_id < 1 then 
+	else
 		info.global_spec_id = DF:GetClassSpecIDs(info.class)[1]
-	end 
+	end
 	-- get talent from LibGroupTalents
 	info.has_talent = function(talent) 
 		local talentname = GetSpellInfo(talent)
@@ -592,6 +583,7 @@ local setup_player_bar = function (self, panel, player, spell, bar_index)
 	self.spellid = spell.spellid
 	self.playername = player.name
 	self.player = player
+	self.grow_inverse = panel.grow_inverse
 	
 	if (Cooldowns.db.bar_class_color) then
 		self.color = player.class
@@ -660,8 +652,13 @@ local refresh_bar_settings = function (self)
 	
 	self.texture = Cooldowns.db.bar_texture
 
-	self:SetPoint ("topleft", self:GetParent(), "topleft", 2, (-(self.MyIndex-1)*(Cooldowns.db.bar_height+1)) + (-2))
-	self:SetPoint ("topright", self:GetParent(), "topright", -2, (-(self.MyIndex-1)*(Cooldowns.db.bar_height+1)) + (-2))
+	if self.grow_inverse then
+		self:SetPoint ("topleft", self:GetParent(), "topleft", 2, ((self.MyIndex-1)*(Cooldowns.db.bar_height+1)) +2)
+		self:SetPoint ("topright", self:GetParent(), "topright", -2, ((self.MyIndex-1)*(Cooldowns.db.bar_height+1)) + 2)
+	else
+		self:SetPoint ("topleft", self:GetParent(), "topleft", 2, (-(self.MyIndex-1)*(Cooldowns.db.bar_height+1)) + (-2))
+		self:SetPoint ("topright", self:GetParent(), "topright", -2, (-(self.MyIndex-1)*(Cooldowns.db.bar_height+1)) + (-2))
+	end
 	
 	self:EnableMouse (false)
 end
@@ -886,11 +883,9 @@ function Cooldowns.ShowPanelInScreen (panel, show, event)
 		if (not Cooldowns.RosterIsEnabled) then
 			Cooldowns.RosterIsEnabled = true
 			
-			LibGroupInSpecT.RegisterCallback (Cooldowns, "GroupInSpecT_Update", "LibGroupInSpecT_UpdateReceived")
+			LibGroupTalents.RegisterCallback(Cooldowns, "LibGroupTalents_Update")
 			Cooldowns:RegisterEvent ("PARTY_MEMBERS_CHANGED", received_roster_event)
 			Cooldowns:RegisterEvent ("RAID_ROSTER_UPDATE", received_roster_event)
-			Cooldowns:RegisterEvent ("PARTY_MEMBER_DISABLE", player_connected_event)
-			Cooldowns:RegisterEvent ("PARTY_MEMBER_ENABLE", player_connected_event)
 			Cooldowns:RegisterEvent ("UNIT_CONNECTION", player_connected_event)
 			--Cooldowns:RegisterEvent ("UNIT_HEALTH", player_health_event)
 			Cooldowns:RegisterEvent ("UNIT_HEALTH_FREQUENT", player_health_event)
@@ -1144,6 +1139,7 @@ function Cooldowns.BarControl (update_type, unitid, spellid)
 		for id, panel in pairs (Cooldowns.ScreenPanels) do
 			local cooldown_raid = Cooldowns.db.cooldowns_panels [id].cooldowns_raid
 			local cooldown_external = Cooldowns.db.cooldowns_panels [id].cooldowns_external
+			panel.grow_inverse = Cooldowns.db.cooldowns_panels [id].grow_inverse
 			
 			--> update allowed spells in this panel
 			Cooldowns.BarControlUpdatePanelSpells (panel, cooldown_raid, cooldown_external)
@@ -1330,6 +1326,12 @@ function Cooldowns.BuildOptions (frame)
 			set = function (self, fixedparam, value) current_editing_panel.cooldowns_external = value; Cooldowns.CheckForShowPanels ("TOGGLE_OPTIONS"); update_panels_config() end,
 			name = L["S_PLUGIN_COOLDOWNS_EXTERNAL_CDS"],
 		},
+		{
+			type = "toggle",
+			get = function() return current_editing_panel.grow_inverse end,
+			set = function(self, fixedparam, value) current_editing_panel.grow_inverse = value; Cooldowns.CheckForShowPanels ("TOGGLE_OPTIONS"); update_panels_config() end,
+			name = "Grow Upwards",
+		}
 	}
 	
 	local options_text_template = Cooldowns:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE")

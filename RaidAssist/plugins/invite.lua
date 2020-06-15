@@ -978,7 +978,7 @@ function Invite.DoInvitesForPreset (preset)
 		SetGuildRosterShowOffline(false)
 	end
 
-	local in_raid, playerIsInGroup = IsInRaid (), IsInGroup ()
+	local in_raid= IsInRaid ()
 	if (not in_raid) then
 		Invite:RegisterEvent ("PARTY_MEMBERS_CHANGED")
 		-- check if we're already in a party first
@@ -992,7 +992,7 @@ function Invite.DoInvitesForPreset (preset)
 		for i = 1, GetNumGuildMembers() do
 			local name, rank, rankIndex, level, classDisplayName, zone, note, officernote, isOnline = GetGuildRosterInfo (i) --, status, class, achievementPoints, achievementRank, isMobile, canSoR, repStanding
 			if (preset.ranks [rankIndex+1] and isOnline and not isMobile) then
-				if (my_name ~= name and ((in_raid and not UnitInRaid (name)) or (playerIsInGroup and not UnitInParty (name)) or (not in_raid and not playerIsInGroup))) then
+				if (my_name ~= name and ((in_raid and not UnitInRaid(name)) or (not in_raid and not UnitInParty(name))) ) then
 					InviteUnit (name)
 					--print ("Inviting", name)
 					invites_sent = invites_sent + 1
@@ -1007,7 +1007,7 @@ function Invite.DoInvitesForPreset (preset)
 		for i = 1, GetNumGuildMembers() do
 			local name, rank, rankIndex, level, classDisplayName, zone, note, officernote, isOnline = GetGuildRosterInfo (i) --, status, class, achievementPoints, achievementRank, isMobile, canSoR, repStanding
 			if (preset.ranks [rankIndex+1] and isOnline and not isMobile) then
-				if (my_name ~= name and ((in_raid and not UnitInRaid (name)) or (playerIsInGroup and not UnitInParty (name)) or (not in_raid and not playerIsInGroup))) then
+				if (my_name ~= name and ((in_raid and not UnitInRaid(name)) or (not in_raid and not UnitInParty(name))) ) then
 					InviteUnit (name)
 				end
 			end
@@ -1191,8 +1191,8 @@ function Invite:SendInviteAnnouncementMsg()
 		msg = Invite.db.invite_msg
 	end
 	
-	--print("[GUILD] " .. msg)
-	SendChatMessage (Invite.db.invite_msg, "GUILD")
+	print("[GUILD] " .. msg)
+	--SendChatMessage (msg, "GUILD")
 end
 
 

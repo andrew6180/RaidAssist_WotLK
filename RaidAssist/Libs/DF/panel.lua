@@ -5975,7 +5975,13 @@ function DF:CreateLoadFilterParser (callback)
 			end
 
 		elseif (event == "PLAYER_ROLES_ASSIGNED") then
-			local assignedRole = DF.UnitGroupRolesAssigned ("player")
+			local assignedRole = UnitGroupRolesAssigned ("player")
+			if (assignedRole == "NONE") then
+				local spec = DetailsFramework.GetSpecialization()
+				if (spec) then
+					assignedRole = DetailsFramework.GetSpecializationRole (spec)
+				end
+			end
 
 			if (DF.CurrentPlayerRole == assignedRole) then
 				return
@@ -6478,6 +6484,25 @@ function DF:OpenLoadConditionsPanel (optionsTable, callback, frameOptions)
 			roleTypesGroup:SetPoint ("topleft", f, "topleft", anchorPositions.role [1], anchorPositions.role [2])
 			roleTypesGroup.DBKey = "role"
 			tinsert (f.AllRadioGroups, roleTypesGroup)
+
+		--create radio group for mythic+ affixes
+			local affixes = {}
+			for i = 2, 1000 do
+				local affixName, desc, texture = C_ChallengeMode.GetAffixInfo (i)
+				if (affixName) then
+					tinsert (affixes, {
+						name = affixName,
+						set = f.OnRadioCheckboxClick,
+						param = i,
+						get = function() return f.OptionsTable.affix [i] end,
+						texture = texture,
+					})
+				end
+			end
+			local affixTypesGroup = DF:CreateRadionGroup (f, affixes, name, {width = 200, height = 200, title = "M+ Affixes"})
+			affixTypesGroup:SetPoint ("topleft", f, "topleft", anchorPositions.affix [1], anchorPositions.affix [2])
+			affixTypesGroup.DBKey = "affix"
+			tinsert (f.AllRadioGroups, affixTypesGroup)
 
 		--text entries functions
 			local textEntryRefresh = function (self)
