@@ -4,6 +4,7 @@ local RA = RaidAssist
 local L = LibStub ("AceLocale-3.0"):GetLocale ("RaidAssistAddon")
 local _
 local default_priority = 23
+local DF = DetailsFramework
 
 if (_G ["RaidAssistRaidGroups"]) then
 	return

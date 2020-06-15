@@ -550,6 +550,7 @@ function Cooldowns.CheckIfNoPanel()
 		local first_panel = Cooldowns.CreateNewPanel()
 		first_panel.cooldowns_raid = true
 		first_panel.cooldowns_external = true
+		first_panel.grow_inverse = false
 	end	
 end
 
@@ -583,7 +584,6 @@ local setup_player_bar = function (self, panel, player, spell, bar_index)
 	self.spellid = spell.spellid
 	self.playername = player.name
 	self.player = player
-	self.grow_inverse = panel.grow_inverse
 	
 	if (Cooldowns.db.bar_class_color) then
 		self.color = player.class
@@ -1139,7 +1139,6 @@ function Cooldowns.BarControl (update_type, unitid, spellid)
 		for id, panel in pairs (Cooldowns.ScreenPanels) do
 			local cooldown_raid = Cooldowns.db.cooldowns_panels [id].cooldowns_raid
 			local cooldown_external = Cooldowns.db.cooldowns_panels [id].cooldowns_external
-			panel.grow_inverse = Cooldowns.db.cooldowns_panels [id].grow_inverse
 			
 			--> update allowed spells in this panel
 			Cooldowns.BarControlUpdatePanelSpells (panel, cooldown_raid, cooldown_external)
@@ -1181,6 +1180,8 @@ function Cooldowns.BarControl (update_type, unitid, spellid)
 						--> the loop doesn't know the player spec, so this
 						--> player can be a holy priest and the loop iterating through vampiric embrace from a shadow priest.
 						if (spell) then
+							bar.grow_inverse = Cooldowns.db.cooldowns_panels [id].grow_inverse
+							bar:UpdateSettings()
 							bar:SetupPlayer (panel, player, spell, bar_index)
 							bar_index = bar_index + 1
 						end

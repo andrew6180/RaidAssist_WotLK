@@ -32,5 +32,6 @@ plugins\addonscheck.lua
 plugins\aurachecker.lua
 plugins\aurabank.lua
 plugins\pastetext.lua
+plugins\roll.lua
 
 indent.lua
