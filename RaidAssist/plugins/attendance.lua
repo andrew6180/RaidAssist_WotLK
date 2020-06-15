@@ -337,6 +337,18 @@ function Attendance.BuildOptions (frame)
 	local sort2_button =  Attendance:CreateButton (frame, function() Attendance.db.sorting_by = 2; Attendance.update_attendance() end, 80, 20, "Sort ATT", _, _, _, "button_sort2", _, _, Attendance:GetTemplate ("dropdown", "OPTIONS_DROPDOWN_TEMPLATE"), Attendance:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
 	sort2_button:SetPoint ("left", sort1_button, "right", 2, 0)
 	sort2_button:SetIcon ([[Interface\BUTTONS\UI-StopButton]], 14, 14, "overlay", {0, 1, 0, 1}, {1, 1, 1}, 2, 1, 0)
+
+	local pos = -frame.fill_panel:GetHeight() - 70
+	for i, rank in pairs(RA:GetGuildRanks()) do 
+		local rank_label = Attendance:CreateLabel (frame, "Ignore "..rank..":", Attendance:GetTemplate("font", "OPTIONS_FONT_TEMPLATE"))
+		Attendance.db.ignore_rank = Attendance.db.ignore_rank or {}
+		Attendance.db.ignore_rank[i] = Attendance.db.ignore_rank[i] or false
+		local rank_checkbox = Attendance:CreateSwitch (frame, function(_, _, value) Attendance.db.ignore_rank[i] = value end, Attendance.db.ignore_rank[i], 60, 20, _, _, "rank_enabled"..i, _, _, _, _, _, Attendance:GetTemplate("switch", "OPTIONS_CHECKBOX_BRIGHT_TEMPLATE"))
+		rank_checkbox:SetAsCheckBox()
+		rank_label:SetPoint("topleft", frame, "topleft", 2, pos)
+		rank_checkbox:SetPoint("left", rank_label, "right", 2, 0)
+		pos = pos - 25
+	end
 	
 	frame:SetScript ("OnShow", function()
 		Attendance.update_attendance()
@@ -392,9 +404,9 @@ function Attendance:CaptureIsOver()
 end
 
 function Attendance:GetPlayerID (unitid)
-	local guid = UnitGUID (unitid)
-	if (guid) then
-		return guid:gsub ("^.*-", "")
+	local name = UnitName (unitid)
+	if (name) then
+		return name
 	end
 end
 
@@ -436,27 +448,23 @@ end
 local do_capture_tick = function (tick_object)
 
 	local amt_player = 0
-
-	if (IsInRaid()) then
-		local guild_name = Attendance.guild_name --string guild name
-		local player_table = Attendance.player_table.players --holds [player id] = number
-		local name_pool = Attendance.db.playerids
-		
-		for i = 1, GetNumGroupMembers() do
-			local player_guild = GetGuildInfo ("raid" .. i)
-			if (player_guild == Attendance.guild_name) then
-				local id = Attendance:GetPlayerID ("raid" .. i)
-				if (id) then
-					player_table [id] = (player_table [id] or 0) + 1
-					amt_player = amt_player + 1
-					if (not name_pool [id]) then
-						name_pool [id] = GetUnitName ("raid" .. i, true)
-					end
-				end
+	local player_table = Attendance.player_table.players --holds [player id] = number
+	local name_pool = Attendance.db.playerids
+	local show_offline = GetGuildRosterShowOffline()
+	SetGuildRosterShowOffline(false)
+	
+	for i = 1, GetNumGuildMembers() do 
+		local name, _, rank_id = GetGuildRosterInfo(i)
+		if name and rank_id and not Attendance.db.ingore_rank[rank_id] then 
+			player_table [name] = (player_table [name] or 0) + 1
+			amt_player = amt_player + 1
+			if not name_pool [name] then 
+				name_pool [name] = name
 			end
 		end
 	end
-	
+
+	SetGuildRosterShowOffline(show_offline)
 	Attendance:Msg ("Tick", amt_player, "counted.")
 	
 	if (tick_object._remainingIterations == 1) then

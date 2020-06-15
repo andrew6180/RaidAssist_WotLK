@@ -414,7 +414,7 @@ function RaidSchedule.BuildOptions (frame)
 				attendance_table.days_table[i].end_min = panel ["dropdown_end_time_min" .. i].value
 				attendance_table.days_table[i].end_day = panel ["dropdown_end_day" .. i].value
 			end
-			
+
 			RaidSchedule:OnEditRaidScheduleTable (attendance_table)
 			
 			panel.button_create.text = "Create"
@@ -442,7 +442,6 @@ function RaidSchedule.BuildOptions (frame)
 					end_day = panel ["dropdown_end_day" .. i].value,
 				}
 			end
-
 			new_attendance.weeks = 4
 			new_attendance.serial = math.random (1000000, 9000000)
 			new_attendance.only_guild_members = true
@@ -587,6 +586,7 @@ function RaidSchedule.BuildOptions (frame)
 			panel ["dropdown_end_time_min" .. i]:Disable()
 			panel ["dropdown_end_day" .. i]:Disable()
 		end
+		
 		
 		--print (panel ["switch_enabled1"].Disable)
 		

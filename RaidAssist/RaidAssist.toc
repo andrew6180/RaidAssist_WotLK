@@ -23,8 +23,6 @@ plugins\attendance.lua
 plugins\battleres.lua
 plugins\cooldowns.lua
 plugins\playercheck.lua
-plugins\bislist.lua
-plugins\raidbislist.lua
 plugins\invite.lua
 plugins\notes.lua
 plugins\raidgroups.lua
