@@ -8,6 +8,7 @@ local IsInRaid = IsInRaid
 local IsInParty = IsInParty
 local tsort = table.sort
 
+
 ROLL_PATTERN = string.gsub(ROLL_PATTERN, "[%(%)%-%+%[%]]", "%%%1")
 ROLL_PATTERN = string.gsub(ROLL_PATTERN, "%%s", "(.-)")
 ROLL_PATTERN = string.gsub(ROLL_PATTERN, "%%d", "%(%%d-%)")
@@ -70,7 +71,11 @@ Roll.OnEnable = function (plugin)
 		item = nil,
 		rolling = false,
 		timers = {}
-	}
+    }
+    if not Roll.Panel then 
+        Roll.BuildFrame()
+    end
+
 	Roll:RegisterEvent("CHAT_MSG_RAID", Roll.CHAT_MSG)
 	Roll:RegisterEvent("CHAT_MSG_PARTY", Roll.CHAT_MSG)
 	Roll:RegisterEvent("CHAT_MSG_RAID_WARNING", Roll.CHAT_MSG)
@@ -80,7 +85,10 @@ Roll.OnEnable = function (plugin)
 end
 
 Roll.OnDisable = function (plugin)
-	Module.activeRoll = nil
+    Roll.activeRoll = nil
+    if Roll.Panel then 
+        Roll.Panel:Hide()
+    end
 	Roll:UnregisterEvent("CHAT_MSG_RAID", Roll.CHAT_MSG)
 	Roll:UnregisterEvent("CHAT_MSG_PARTY", Roll.CHAT_MSG)
 	Roll:UnregisterEvent("CHAT_MSG_RAID_WARNING", Roll.CHAT_MSG)
@@ -104,6 +112,59 @@ end
 function Roll.OnShowOnOptionsPanel()
 	local OptionsPanel = Roll.OptionsPanel
 	Roll.BuildOptions (OptionsPanel)
+end
+
+
+function Roll.BuildFrame() 
+    local frame = Roll:CreateCleanFrame(Roll, "RAARollFrame") 
+    frame:SetSize(350, 120)
+
+    local ProgressBar = Roll:CreateBar(frame, nil, 350, 16, 100) 
+    ProgressBar:SetFrameLevel(frame:GetFrameLevel()+1)
+    ProgressBar.RightTextIsTimer = true 
+    ProgressBar.BarIsInverse = true 
+    ProgressBar:SetPoint ("topleft", frame, "topleft", 10, -50)
+    ProgressBar:SetPoint ("topright", frame, "topright", -10, 50)
+    ProgressBar.texture = "Iskar Serenity"
+
+    local itemString = Roll:CreateLabel(frame, "ITEM_NAME")
+    itemString:SetPoint("topleft", frame, "topleft", 8, -10)
+    Roll:SetFontSize(itemString, 14)
+    Roll:SetFontOutline (itemString, true)
+
+    Roll.PlayerList = {}
+    local x = 10
+    local y = -75
+    for i = 1, 40 do 
+        local Cross = Roll:CreateImage (frame, "Interface\\Glues\\LOGIN\\Glues-CheckBox-Check", 16, 16, "overlay")
+        local Label = Roll:CreateLabel (frame, "Player Name")
+        local RollLabel = Roll:CreateLabel(frame, "999")
+        Label:SetPoint ("left", Cross, "right", 2, 0)
+        RollLabel:SetPoint("left", Label, "right", 2, 0)
+        Cross.Label = Label
+        Cross.RollLabel = RollLabel
+		Cross:SetPoint ("topleft", frame, "topleft", x, y)
+		if (i%2 == 0) then
+			x = 10
+			y = y - 16
+		else
+			x = 140
+		end
+		Cross:Hide()
+        tinsert (Roll.PlayerList, Cross)
+    end
+    local ebutton = Roll:CreateButton(frame, Roll.EndRollEarly, 100, 20, "End Roll", _, _, _, "ebutton", _, _, Roll:GetTemplate("button", "OPTIONS_BUTTON_TEMPLATE"), Roll:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
+    local cbutton = Roll:CreateButton(frame, Roll.CancelRoll, 100, 20, "Cancel Roll", _, _, _, "cbutton", _, _, Roll:GetTemplate("button", "OPTIONS_BUTTON_TEMPLATE"), Roll:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
+
+    ebutton:SetPoint("bottomleft", frame, "bottomleft", 0, 0)
+    cbutton:SetPoint("bottomleft", frame, "bottomleft", 102, 0)
+
+    ebutton:SetFrameLevel(frame:GetFrameLevel() + 1)
+    cbutton:SetFrameLevel(ebutton:GetFrameLevel())
+
+    Roll.Panel = frame 
+    Roll.ProgressBar = ProgressBar 
+    Roll.ItemString = itemString
 end
 
 
@@ -248,6 +309,7 @@ function Roll:CHAT_MSG_ROLL(text, ...)
         else
             tinsert(Roll.activeRoll.rolls, {name, roll})
         end
+        Roll.UpdatePanel()
     end
 end
 
@@ -307,6 +369,49 @@ function Roll:Say(msg, loud)
         end
 end
 
+function Roll.UpdatePanel() 
+    tsort(Roll.activeRoll.rolls, function(a, b) return a[2] > b[2] end)
+    local i = 1
+
+    for _, data in ipairs(Roll.activeRoll.rolls) do 
+        local name, roll = unpack(data)
+        local _, class = UnitClass(name)
+        local slot = Roll.PlayerList[i] 
+        slot:Show()
+        slot.Label:Show()
+        slot.RollLabel:Show()
+
+        if i <= Roll.activeRoll.count then
+            slot:SetTexture("Interface\\AddOns\\" .. RA.InstallDir .. "\\media\\Check")
+        else 
+            slot:SetTexture("Interface\\Glues\\LOGIN\\Glues-CheckBox-Check")
+        end
+
+        slot:SetTexCoord(0, 1, 0, 1)
+        local color = class and RAID_CLASS_COLORS [class] and RAID_CLASS_COLORS [class].colorStr or "ffffffff"
+        slot.Label:SetText("|c" .. color .. name .. "|r")
+        slot.RollLabel:SetText("|cFFebe534"..roll.."|r")
+        i = i + 1
+    end
+
+    Roll.Panel:SetHeight (120 + (math.ceil ((i-1) / 2) * 17))
+end
+
+function Roll:ShowRollPanel(itemLink, timelimit)
+    wipe(Roll.activeRoll.rolls) -- clean just incase 
+    Roll.Panel:Show()
+    Roll.ProgressBar:SetTimer(timelimit + 1)
+    Roll.ItemString.text = "Roll for: " .. itemLink 
+    if (Roll.activeRoll.count > 1) then 
+        Roll.ItemString.text = Roll.ItemString.text .. " x"..Roll.activeRoll.count 
+    end
+
+    for Index, Player in ipairs (Roll.PlayerList) do
+        Player:Hide()
+        Player.Label:Hide()
+        Player.RollLabel:Hide()
+    end
+end
 
 function Roll:StartNewRoll(itemLink)
 
@@ -314,9 +419,10 @@ function Roll:StartNewRoll(itemLink)
     Roll.activeRoll.item = itemLink
     Roll.activeRoll.rerolls = nil
     Roll.activeRoll.acceptingRolls = true
-    
 
     local timelimit = Roll.db.roll_time or 30
+
+    Roll:ShowRollPanel(itemLink, timelimit)
 
     Roll:Say("Roll ending in " .. timelimit .. " seconds!")
     Roll:ScheduleEndRoll(timelimit)
@@ -343,6 +449,9 @@ function Roll:StartReroll(rerolls)
 
     Roll:Say(players .. " Reroll for " .. Roll.activeRoll.item, true)
     local timelimit = Roll.db.reroll_time or 20
+
+    Roll:ShowRollPanel(itemLink, timelimit)
+
     Roll:Say("Roll ending in " .. timelimit .. " seconds!") 
 
     Roll:ScheduleEndRoll(timelimit)
@@ -401,6 +510,7 @@ end
 
 
 function Roll:FinalizeRoll()
+    Roll.Panel:Hide()
     Roll.activeRoll.timers = {}
     Roll.activeRoll.rolls = {}
     Roll.activeRoll.item = nil

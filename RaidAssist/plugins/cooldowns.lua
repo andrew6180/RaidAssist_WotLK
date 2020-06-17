@@ -126,7 +126,9 @@ end
 
 function Cooldowns:COMBAT_LOG_EVENT_UNFILTERED(self, time, event, who_guid, who_name, who_flags, target_guid, targeT_name, target_flags, spellid, ...)
 	if event == "SPELL_CAST_SUCCESS" or "SPELL_RESURRECT" then 
-		Cooldowns.HandleSpellCast (event, who_name, who_guid, spellid)
+		if who_name and who_name ~= "" and who_guid and spellid then
+			Cooldowns.HandleSpellCast (event, who_name, who_guid, spellid)
+		end
 	end
 end
 --[=[
