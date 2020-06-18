@@ -431,7 +431,7 @@ function AddonsCheck.RequestData()
 		end
 	
 	elseif (IsInGroup()) then
-		for i = 1, GetNumGroupMembers() - 1 do
+		for i = 1, GetNumGroupMembers() do
 			local playerName = UnitName ("party" .. i)
 			
 			--constroi a tabela
