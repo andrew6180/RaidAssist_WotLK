@@ -41,7 +41,6 @@ local default_config = {
 	only_inside_instances = false,
 	only_in_raid_group = true,
 	only_in_combat = false,
-	only_in_raid_encounter = false,
 }
 
 --> check for new cooldowns
@@ -95,8 +94,6 @@ Cooldowns.OnInstall = function (plugin)
 	Cooldowns:RegisterEvent ("ZONE_CHANGED_NEW_AREA")
 	Cooldowns:RegisterEvent ("PLAYER_REGEN_DISABLED")
 	Cooldowns:RegisterEvent ("PLAYER_REGEN_ENABLED")
-	Cooldowns:RegisterEvent ("ENCOUNTER_START")
-	Cooldowns:RegisterEvent ("ENCOUNTER_END")
 	
 	Cooldowns:RegisterEvent ("COMBAT_LOG_EVENT_UNFILTERED")
 
@@ -241,11 +238,6 @@ function Cooldowns.CheckForShowPanels (event)
 			if (debugMode) then print ("show because", 4) end
 			show = true
 		end
-
-		if (Cooldowns.db.only_in_raid_encounter and Cooldowns.in_raid_encounter) then
-			if (debugMode) then print ("show because", 5) end
-			show = true
-		end
 	
 	else
 		if (debugMode) then print ("show because", "forcing to show") end
@@ -303,16 +295,6 @@ function Cooldowns:PLAYER_REGEN_ENABLED()
 	Cooldowns.in_combat = false
 	Cooldowns.CheckForShowPanels ("LEFT_COMBAT")
 	Cooldowns.ResetDeathTable()
-end
-
-function Cooldowns:ENCOUNTER_START()
-	Cooldowns.in_raid_encounter = true
-	Cooldowns.CheckForShowPanels ("ENCOUNTER_START")
-end
-
-function Cooldowns:ENCOUNTER_END()
-	Cooldowns.in_raid_encounter = false
-	Cooldowns.CheckForShowPanels ("ENCOUNTER_END")
 end
 
 local panel_prototype = {
@@ -1436,12 +1418,6 @@ function Cooldowns.BuildOptions (frame)
 			get = function() return Cooldowns.db.only_in_combat end,
 			set = function (self, fixedparam, value) Cooldowns.db.only_in_combat = value; Cooldowns.CheckForShowPanels ("TOGGLE_OPTIONS") end,
 			name = L["S_ANCHOR_ONLY_IN_COMBAT"],
-		},
-		{
-			type = "toggle",
-			get = function() return Cooldowns.db.only_in_raid_encounter end,
-			set = function (self, fixedparam, value) Cooldowns.db.only_in_raid_encounter = value; Cooldowns.CheckForShowPanels ("TOGGLE_OPTIONS") end,
-			name = L["S_ANCHOR_ONLY_IN_ENCOUNTER"],
 		},
 		
 		{type = "label", get = function() return "Text:" end, text_template = Cooldowns:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
