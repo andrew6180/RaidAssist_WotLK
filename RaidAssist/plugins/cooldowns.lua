@@ -1057,6 +1057,13 @@ function Cooldowns.BarControl (update_type, unitid, spellid)
 		local name = get_unit_name (unitid)
 		local _, class_name = UnitClass (unitid)
 		local class_number = DF.ClassFileNameToIndex[class_name]
+		if not (Cooldowns.Roster [class_number]) then 
+			print("[RAA] ERROR", "CLASS_NUMBER =", class_number, "CLASS_NAME =", class_name)
+		end
+
+		if not (Cooldowns.Roster [class_number] [name]) then 
+			print("[RAA] ERROR", "CLASS_NUMBER =", class_number, "CLASS_NAME =", class_name, "NAME =", name)
+		end
 		local player = Cooldowns.Roster [class_number] [name]
 
 		if (not player) then

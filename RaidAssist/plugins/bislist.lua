@@ -12,8 +12,8 @@ local default_config = {
 	characters = {},
 }
 
-local icon_texture = [[Interface\GUILDFRAME\GuildLogo-NoLogo]]
-local icon_texcoord = {l=10/64, r=54/64, t=10/64, b=54/64}
+local icon_texture = [[Interface\GROUPFRAME\UI-Group-MasterLooter]]
+local icon_texcoord = {l=0, r=1, t=0, b=1}
 local text_color_enabled = {r=1, g=1, b=1, a=1}
 local text_color_disabled = {r=0.5, g=0.5, b=0.5, a=1}
 
@@ -111,6 +111,7 @@ BisList.LostList = {
 	[INVSLOT_BACK] = 14,
 	[INVSLOT_MAINHAND] = 15,
 	[INVSLOT_OFFHAND] = 16,
+	[INVSLOT_RANGED] = 17,
 }
 
 function BisList:GetMyItems()
@@ -167,6 +168,9 @@ function BisList:GetMyItems()
 	--weapon2
 	local item_id, diff = get_current_equiped_itemid (INVSLOT_OFFHAND)
 	IHave [BisList.LostList [INVSLOT_OFFHAND]] = "" .. (list [BisList.LostList [INVSLOT_OFFHAND]] == item_id and "1" or "0") .. ":" .. diff
+
+	local item_id, diff = get_current_equiped_itemid (INVSLOT_RANGED)
+	IHave [BisList.LostList [INVSLOT_RANGED]] = "" .. (list [BisList.LostList [INVSLOT_RANGED]] == item_id and "1" or "0") .. ":" .. diff
 	
 	return IHave
 end
@@ -231,9 +235,32 @@ function BisList.BuildOptions (frame)
 		L["S_EQUIPSLOT_15"],--14
 		"Main Hand", --15
 		"Off Hand", --16
-		"Ranged / Relic", 
-		--L["S_EQUIPSLOT_16"],--15
-		--L["S_EQUIPSLOT_16"],--16
+		"Ranged", -- 17
+	}
+
+	local invtype_to_slotid = { 
+		["INVTYPE_HEAD"] = 1,
+		["INVTYPE_NECK"] = 2, 
+		["INVTYPE_SHOULDER"] = 3,
+		["INVTYPE_CHEST"] = 4, 
+		["INVTYPE_ROBE"] = 4,
+		["INVTYPE_WAIST"] = 5,
+		["INVTYPE_LEGS"] = 6,
+		["INVTYPE_FEET"] = 7,
+		["INVTYPE_WRIST"] = 8,
+		["INVTYPE_HAND"] = 9, 
+		["INVTYPE_FINGER"] = {10, 11},
+		["INVTYPE_TRINKET"] = {12, 13}, 
+		["INVTYPE_CLOAK"] = 14, 
+		["INVTYPE_WEAPON"] = {15, 16},
+		["INVTYPE_WEAPONMAINHAND"] = 15,
+		["INVTYPE_WEAPONOFFHAND"] = 16, 
+		["INVTYPE_2HWEAPON"] = 15,
+		["INVTYPE_HOLDABLE"] = 16,
+		["INVTYPE_SHIELD"] = 16,
+		["INVTYPE_THROWN"] = 17,
+		["INVTYPE_RANGEDRIGHT"] = 17,
+		["INVTYPE_RELIC"] = 17,
 	}
 	local slot_indexes = {1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 11, 13, 13, 15, 16, 16, 18, 18, 19, 20, 20, 20} --16, 16
 	local armor_slots = {[1]=true, [3]=true, [5]=true, [6]=true, [7]=true, [8]=true, [9]=true, [10]=true}
@@ -307,8 +334,26 @@ function BisList.BuildOptions (frame)
 		waiting.id, waiting.item, waiting.obj = slotid, itemid, obj
 		
 
-		local itemName, itemLink, _, itemLevel, _, itemType, itemSubType, _, _, itemTexture = GetItemInfo (itemid)
+		local itemName, itemLink, _, itemLevel, _, itemType, itemSubType, _, invtype, itemTexture = GetItemInfo (itemid)
+		
+		local is_correct_slot = invtype_to_slotid[invtype] == slotid
+		if type(invtype_to_slotid[invtype]) == "table" then 
+			is_correct_slot = false 
+			for _, id in ipairs(invtype_to_slotid[invtype]) do 
+				if id == slotid then 
+					is_correct_slot = true 
+					break
+				end
+			end
+		end
+
+		if not is_correct_slot then 
+			select_item_frame:Hide()
+			return
+		end
+
 		if (itemName) then
+
 			if (not player_armor_type or not armor_types [itemSubType] or (player_armor_type and player_armor_type == itemSubType)) then
 				local button = select_item_frame.buttons [button_index]
 				if (not button) then
@@ -318,6 +363,7 @@ function BisList.BuildOptions (frame)
 					button:SetPoint ("topright", select_item_frame, "topright", -2, -(button_index-1)*21)
 					button:SetHook ("OnEnter", button_select_panel_on_enter)
 					button:SetHook ("OnLeave", button_select_panel_on_leave)
+					button:EnableMouse(true)
 				end
 
 				button:SetText (itemName)
