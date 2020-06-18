@@ -30,12 +30,11 @@ end
 local BisListRaid = {version = "v0.1", pluginname = "BisListRaid"}
 _G ["RaidAssistBisListRaid"] = BisListRaid
 
-BisListRaid.IsDisabled = true
+BisListRaid.IsDisabled = false
 --BisListRaid.IsDisabled = false
 
 local BisList = _G ["RaidAssistBisList"]
 
-local can_install = false
 local can_install = true
 
 BisListRaid.last_data_request = 0

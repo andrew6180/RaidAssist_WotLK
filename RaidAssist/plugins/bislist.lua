@@ -23,10 +23,8 @@ end
 local BisList = {version = "v0.1", pluginname = "BisList"}
 _G ["RaidAssistBisList"] = BisList
 
-BisList.IsDisabled = true
---BisList.IsDisabled = false
+BisList.IsDisabled = false
 
-local can_install = false
 local can_install = true
 
 BisList.menu_text = function (plugin)
