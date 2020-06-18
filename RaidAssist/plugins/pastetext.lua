@@ -1,5 +1,3 @@
-
-
 local RA = RaidAssist
 local L = LibStub ("AceLocale-3.0"):GetLocale ("RaidAssistAddon")
 local _
@@ -8,6 +6,11 @@ local default_priority = 20
 if (_G ["RaidAssistPasteText"]) then
 	return
 end
+
+if true then -- paste text is kinda useless imo
+	return 
+end
+
 local PasteText = {version = "v0.1", pluginname = "PasteText"}
 _G ["RaidAssistPasteText"] = PasteText
 
