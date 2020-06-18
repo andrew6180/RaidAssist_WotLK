@@ -181,7 +181,7 @@ end
 function LeaderToolbar.CreateScreenPanel()
 
 	local ScreenPanel = LeaderToolbar:CreateCleanFrame (LeaderToolbar, "LeaderToolbarScreenFrame")
-	ScreenPanel:SetSize (292, 46)
+	ScreenPanel:SetSize (396, 23)
 	LeaderToolbar.ScreenPanel = ScreenPanel
 	
 	DetailsFramework:ApplyStandardBackdrop (ScreenPanel)
@@ -199,18 +199,6 @@ function LeaderToolbar.CreateScreenPanel()
 	end
 	
 	LeaderToolbar.MarkersButtons = {}
-	LeaderToolbar.WorldMarkersButtons = {}
-	
-	local markers_3d = {
-		[[spells\raid_ui_fx_yellow]],
-		[[spells\raid_ui_fx_orange]],
-		[[spells\raid_ui_fx_purple]],
-		[[spells\raid_ui_fx_green]],
-		[[spells\raid_ui_fx_silver]],
-		[[spells\raid_ui_fx_cyan]],
-		[[spells\raid_ui_fx_red]],
-		[[spells\raid_ui_fx_white]]
-	}
 	
 	local button_template = {
 		backdrop = {edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1, bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tileSize = 64, tile = true},
@@ -268,29 +256,6 @@ function LeaderToolbar.CreateScreenPanel()
 		icon:SetVertexColor (unpack (icon_idle_color))
 		button.MyIcon = icon
 		LeaderToolbar.MarkersButtons [i] = button
-		
-		local raid_marker_button = CreateFrame ("button", "LeaderToolbarRaidGroundIcon" .. i, ScreenPanel, "SecureActionButtonTemplate")
-		raid_marker_button:SetAttribute ("type1", "macro")
-		raid_marker_button:SetAttribute ("type2", "macro")
-		raid_marker_button:SetSize (20, 20)
-		raid_marker_button:RegisterForClicks ("AnyDown")
-		raid_marker_button:SetAttribute ("macrotext1", "/wm " .. world_markers_colors [i] .. "")
-		raid_marker_button:SetAttribute ("macrotext2", "/cwm " .. world_markers_colors [i] .. "")
-		raid_marker_button:SetPoint ("top", button.widget, "bottom", 0, -0)
-
-		raid_marker_button:SetScript ("OnEnter", button_on_enter)
-		raid_marker_button:SetScript ("OnLeave", button_on_leave)
-		
-		raid_marker_button:SetBackdrop (button_template.backdrop)
-		raid_marker_button:SetBackdropColor (unpack (button_template.backdropcolor))
-		raid_marker_button:SetBackdropBorderColor (unpack (button_template.backdropbordercolor))
-		
-		local icon = LeaderToolbar:CreateImage (button, [[Interface\AddOns\RaidAssist\media\world_markers_icons]] , 18, 18, "overlay") 
-		icon:SetTexCoord (((i-1) * 20) / 256, ((i) * 20) / 256, 0, 20/32)
-		icon:SetPoint ("center", raid_marker_button, "center", 0, 0)
-		icon:SetVertexColor (unpack (icon_idle_color))
-		raid_marker_button.MyIcon = icon
-		LeaderToolbar.WorldMarkersButtons [i] = raid_marker_button
 	end
 	
 	--> reset buttons
@@ -310,10 +275,6 @@ function LeaderToolbar.CreateScreenPanel()
 	local reset_button = LeaderToolbar:CreateButton (ScreenPanel, reset_marks, 14, 20, "X", _, _, _, "reset_markers_button", _, "none", button_template)
 	--reset_button:SetPoint ("left", LeaderToolbar.MarkersButtons [#LeaderToolbar.MarkersButtons], "right", 2, 0)
 	reset_button:SetPoint ("topleft", ScreenPanel, "topleft", 3 + (8*21), -3)
-	
-	local reset_button2 = LeaderToolbar:CreateButton (ScreenPanel, ClearRaidMarker, 14, 20, "X", _, _, _, "reset_markers_button2", _, "none", button_template)
-	--reset_button2:SetPoint ("left", LeaderToolbar.WorldMarkersButtons [#LeaderToolbar.WorldMarkersButtons], "right", 2, 0)
-	reset_button2:SetPoint ("topleft", ScreenPanel, "topleft", 3 + (8*21), -23)
 	
 	local open_raidstatus = function()
 		RA.OpenMainOptions (_G ["RaidAssistPlayerCheck"])
@@ -343,14 +304,7 @@ function LeaderToolbar.CreateScreenPanel()
 	status_button:SetHook ("OnLeave", function()
 		status_frame:Hide()
 	end)	
-	
-	--> manage groups
-	local open_raidgroups = function()
-		RA.OpenMainOptions (_G ["RaidAssistRaidGroups"])
-	end
-	local raidgroups_button = LeaderToolbar:CreateButton (ScreenPanel, open_raidgroups, 50, 20, "Groups", _, _, _, "raidgroups_button", _, "none", button_template)
-	raidgroups_button:SetPoint ("left", reset_button2, "right", 2, 0)
-	
+
 --	pull_timer = 15,
 --	readycheck_timer = 35,	
 	
@@ -360,6 +314,13 @@ function LeaderToolbar.CreateScreenPanel()
 	end
 	local readycheck_button = LeaderToolbar:CreateButton (ScreenPanel, do_readycheck, 50, 20, "Check", _, _, _, "readycheck_button", _, "none", button_template)
 	readycheck_button:SetPoint ("left", status_button, "right", 2, 0)
+		
+	--> manage groups
+	local open_raidgroups = function()
+		RA.OpenMainOptions (_G ["RaidAssistRaidGroups"])
+	end
+	local raidgroups_button = LeaderToolbar:CreateButton (ScreenPanel, open_raidgroups, 50, 20, "Groups", _, _, _, "raidgroups_button", _, "none", button_template)
+	raidgroups_button:SetPoint ("left", readycheck_button, "right", 2, 0)
 	
 	local function dopull()
 		if (_G.DBM and SlashCmdList ["DEADLYBOSSMODS"]) then
