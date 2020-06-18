@@ -277,7 +277,7 @@ function PlayerCheck.PluginCommReceived (prefix, sourcePluginVersion, player_nam
 		t [4] = lag_l
 		t [5] = t [5] or 0
 		t [6] = t [6] or {}
-		t [7] = t [7] or {0}
+		t [7] = t [7] or ""
 		
 		PlayerCheck.player_data [player_name] = t
 		
@@ -297,7 +297,7 @@ function PlayerCheck.PluginCommReceived (prefix, sourcePluginVersion, player_nam
 		t [4] = lag_l or t [4] or 0
 		t [5] = repair or t [5] or 0
 		t [6] = missing_adds or t [6] or {}
-		t [7] = spec_stalents or t [7] or {0}
+		t [7] = spec_stalents or t [7] or ""
 		
 		PlayerCheck.player_data [player_name] = t
 		
@@ -322,7 +322,7 @@ function PlayerCheck:LibGroupInSpecT_UpdateReceived (event, guid, unitid, info)
 		t [4] = t [4] or 0
 		t [5] = t [5] or 0
 		t [6] = t [6] or {}
-		t [7] = t [7] or {}
+		t [7] = t [7] or ""
 		
 		if (PlayerCheckFillPanel and PlayerCheckFillPanel:IsShown()) then
 			if (PlayerCheck.update_PlayerCheck and PlayerCheck.fill_panel) then
@@ -409,20 +409,7 @@ PlayerCheck.update_PlayerCheck = function (fill_panel, export)
 			
 			missing_enchants_amt = get_missing_color (missing_enchants_amt)
 			
-			local talents = ""
-			for i = 2, #t[7] do
-				local talentID, name, texture, selected, available = GetTalentInfoByID (t[7][i] or 0)
-				if (texture) then
-					talents = talents ..  " |T" .. texture .. ":" .. 15 .. ":" .. 15 ..":0:0:64:64:4:60:4:60|t"
-				end
-			end
-
-			local spec_id, spec_name, spec_description, spec_icon, spec_background, spec_role, spec_class = DF.GetSpecializationInfoByID (t[7][1] or 0)
-			if (spec_icon) then
-				name = "|T" .. spec_icon .. ":" .. 16 .. ":" .. 16 ..":0:0:64:64:4:60:4:60|t " .. (name or "Unknown")
-			else
-				name = name or "Unknown"
-			end
+			local talents = t [7]
 
 			return {name, latency, item_level, repair, missing_enchants_amt, talents}
 		end)

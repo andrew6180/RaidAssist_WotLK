@@ -1,5 +1,6 @@
 local DF = DetailsFramework
 local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
+local LibGroupTalents = LibStub("LibGroupTalents-1.0")
 local RA = RaidAssist
 local _
 
@@ -337,10 +338,11 @@ end
 
 --[=[
 	RA:GetTalents()
-	return a table where the first index is the specialization ID and the other 7 indexes are the IDs for the chosen talents.
+	Returns a talent string of ##/##/##
 --]=]
 function RA:GetTalents()
-	return {}
+	local _, t1, t2, t3 = LibGroupTalents:GetUnitTalentSpec("player")
+	return t1 .. "/" .. t2 .. "/" .. t3
 end
 
 --[=[
