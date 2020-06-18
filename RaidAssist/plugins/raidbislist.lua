@@ -9,7 +9,7 @@ local default_config = {
 	enabled = true,
 	menu_priority = 1,
 	saved_lists = {},
-	latest_raid_map = 1448,
+	latest_raid_map = 536, -- nax for now
 }
 
 -- raid leader query for a single user
@@ -156,14 +156,14 @@ function BisListRaid.BuildOptions (frame)
 					if (haveIt == "0") then
 						local itemName, itemLink, _, itemLevel, _, itemType, itemSubType, _, _, itemTexture = GetItemInfo (itemId)
 						if (itemLink) then
-							str = str .. itemLink .. " "
+							str = str .. "|TInterface\\Glues\\LOGIN\\Glues-CheckBox-Check:32:32|t" .. itemLink .. " "
 						end
 						
 					elseif (haveIt == "1") then
 					
 						local itemName, itemLink, _, itemLevel, _, itemType, itemSubType, _, _, itemTexture = GetItemInfo (itemId)
 						if (itemLink) then
-							str = str .. itemLink
+							str = str .. "|TInterface\\AddOns\\" .. RA.InstallDir .. "\\media\\Check:32:32|t" .. itemLink .. " "
 						end
 					end
 				end
@@ -191,9 +191,9 @@ function BisListRaid.BuildOptions (frame)
 	
 	local dropdown_build_encounter_list = function()
 		local isIn, type = IsInInstance()
-		local mapid
+		local mapid = GetCurrentMapAreaID()
 		if (not isIn or type ~= "raid") then
-			mapid = BisListRaid.db.latest_raid_map
+			mapid = 536 -- naxx for now
 		end
 		local encounters = BisListRaid:GetCurrentRaidEncounterList (mapid)
 		local t = {}
@@ -246,8 +246,8 @@ function BisListRaid.SendMyBisList()
 	local s = ""
 	for index, item_id in ipairs (bislist or {}) do
 		s = s .. item_id .. ":" .. current_items [index] .. ","
+		
 	end
-	
 	--> send the list
 	BisListRaid:SendPluginCommMessage (COMM_RECEIVED_LIST, "RAID", nil, nil, BisListRaid:GetPlayerNameWithRealm(), s)
 	BisListRaid.last_data_sent = time()

@@ -166,8 +166,6 @@ function RA:SendPluginCommMessage (prefix, channel, callback, callbackParam, ...
 		end
 	elseif (channel == "RAID") then
 		if (IsInRaid ()) then
-			RA:SendCommMessage (RA.commPrefix, RA:Serialize (prefix, self.version or "", ...), "INSTANCE_CHAT", nil, nil, callback, callbackParam)
-		else
 			RA:SendCommMessage (RA.commPrefix, RA:Serialize (prefix, self.version or "", ...), "RAID", nil, nil, callback, callbackParam)
 		end
 	elseif (channel == "PARTY-NOINSTANCE") then
@@ -176,8 +174,6 @@ function RA:SendPluginCommMessage (prefix, channel, callback, callbackParam, ...
 		end
 	elseif (channel == "PARTY") then
 		if (IsInGroup ()) then
-			RA:SendCommMessage (RA.commPrefix, RA:Serialize (prefix, self.version or "", ...), "INSTANCE_CHAT", nil, nil, callback, callbackParam)
-		else
 			RA:SendCommMessage (RA.commPrefix, RA:Serialize (prefix, self.version or "", ...), "PARTY", nil, nil, callback, callbackParam)
 		end
 	else
