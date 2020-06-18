@@ -338,16 +338,20 @@ function Attendance.BuildOptions (frame)
 	sort2_button:SetPoint ("left", sort1_button, "right", 2, 0)
 	sort2_button:SetIcon ([[Interface\BUTTONS\UI-StopButton]], 14, 14, "overlay", {0, 1, 0, 1}, {1, 1, 1}, 2, 1, 0)
 
-	local pos = -frame.fill_panel:GetHeight() - 70
+	local posX = frame.fill_panel:GetWidth()
+	local posY = -10
+	local rank_description_label = Attendance:CreateLabel (frame, "Ranks to ignore while tracking", Attendance:GetTemplate("font", "OPTIONS_FONT_TEMPLATE"))
+	rank_description_label:SetPoint("topleft", frame, "topleft", posX, posY)
+	posY = posY - 25
 	for i, rank in pairs(RA:GetGuildRanks()) do 
 		local rank_label = Attendance:CreateLabel (frame, "Ignore "..rank..":", Attendance:GetTemplate("font", "OPTIONS_FONT_TEMPLATE"))
 		Attendance.db.ignore_rank = Attendance.db.ignore_rank or {}
 		Attendance.db.ignore_rank[i] = Attendance.db.ignore_rank[i] or false
 		local rank_checkbox = Attendance:CreateSwitch (frame, function(_, _, value) Attendance.db.ignore_rank[i] = value end, Attendance.db.ignore_rank[i], 60, 20, _, _, "rank_enabled"..i, _, _, _, _, _, Attendance:GetTemplate("switch", "OPTIONS_CHECKBOX_BRIGHT_TEMPLATE"))
 		rank_checkbox:SetAsCheckBox()
-		rank_label:SetPoint("topleft", frame, "topleft", 2, pos)
+		rank_label:SetPoint("topleft", frame, "topleft", posX, posY)
 		rank_checkbox:SetPoint("left", rank_label, "right", 2, 0)
-		pos = pos - 25
+		posY = posY - 25
 	end
 	
 	frame:SetScript ("OnShow", function()
