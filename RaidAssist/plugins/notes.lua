@@ -124,7 +124,7 @@ Notepad.OnInstall = function (plugin)
 	
 	-- background
 	local background = editbox_notes:CreateTexture (nil, "background")
-	background:SetPoint ("topleft", editbox_notes, "topleft", 0, 0)
+	background:SetPoint ("topleft", editbox_notes, "topleft", 0, -5)
 	background:SetPoint ("bottomright", editbox_notes, "bottomright", 0, -5)
 	screen_frame.background = background
 	
@@ -141,13 +141,13 @@ Notepad.OnInstall = function (plugin)
 	
 	local resize_texture = resize_button:CreateTexture (nil, "overlay")
 	resize_texture:SetTexture ([[Interface\CHATFRAME\UI-ChatIM-SizeGrabber-Down]])
-	resize_texture:SetPoint ("topleft", resize_button, "topleft", 0, 0)
+	resize_texture:SetPoint ("bottomright", resize_button, "bottomright", 0, 0)
 	resize_texture:SetSize (16, 16)
-	resize_texture:SetTexCoord (1, 0, 0, 1)
+	resize_texture:SetTexCoord (0, 1, 0, 1)
 	screen_frame.resize_texture = resize_texture
 	
 	resize_button:SetScript ("OnMouseDown", function()
-		editbox_notes:StartSizing ("bottomleft")
+		editbox_notes:StartSizing ("bottomright")
 	end)
 	resize_button:SetScript ("OnMouseUp", function()
 		editbox_notes:StopMovingOrSizing()
@@ -452,7 +452,7 @@ function Notepad.CreateNewNotepad (self, button, name)
 end
 
 -- ~boss
-local list_colors = {{.96, .96, .96}, {1, .8, .2}, {1, 1, .4}, {.8, 1, .2}, {.6, .6, 1}}
+local list_colors = {{.96, .96, .96}, {1, .8, .2}, {1, 1, .4}, {.8, 1, .2}, {.6, .6, 1}, {1, .4, .4}, {.4, 1, .4}}
 function Notepad:BuildBossList()
 	local t = {}
 	
@@ -461,23 +461,25 @@ function Notepad:BuildBossList()
 	local raidPool = {}
 	
 	--put them inside a numeric table
-	for EJ_ID, bossList in pairs (raids) do
-		tinsert (raidPool, {EJ_ID, bossList})
+	for mapID, bossList in pairs (raids) do
+		tinsert (raidPool, {mapID, bossList})
 	end
 	
 	--sort from the first to last release raid
-	table.sort (raidPool, function(t1, t2) return t1[1] > t2[1] end)
+	table.sort (raidPool, function(t1, t2)
+			if t1[1] == 530 then -- ulduar has a lower id than naxx 
+				return 537 < t2[1] -- give a fake id of naxx+1
+			end
+			return t1[1] < t2[1] 
+		end)
 	
 	--fill the dropdown
 	for index, table in ipairs (raidPool) do
-		local EJ_ID = table[1]
+		local mapID = table[1]
 		local bossList = table[2]
-		
-		DF.EncounterJournal.EJ_SelectInstance (EJ_ID)
-		
 		local color = list_colors [index]
-		for i = 1, #bossList do
-			t [#t+1] = {label = DF.EncounterJournal.EJ_GetEncounterInfoByIndex (i, EJ_ID), value = EJ_ID .. "_" .. i, onclick = Notepad.OnBossSelection, color = color}
+		for id, _ in pairs(bossList) do
+			t [#t+1] = {label = RA:GetRaidEncounterName(mapID, id), value = mapID .. "_" .. id, onclick = Notepad.OnBossSelection, color = color}
 		end
 	end
 	return t
@@ -485,8 +487,7 @@ end
 
 function Notepad:GetBossName (boss_id)
 	local instance_id, boss_index = boss_id:match ("(.-)_(.)")
-	DF.EncounterJournal.EJ_SelectInstance (tonumber (instance_id))
-	return DF.EncounterJournal.EJ_GetEncounterInfoByIndex (tonumber (boss_index), tonumber (instance_id))
+	return RA:GetEncounterName(boss_id)
 end
 
 function Notepad:SetCurrentBoss (boss_id)
@@ -1434,7 +1435,7 @@ function Notepad.BuildOptions (frame)
 		if (bossid) then
 			
 			local bossEJID = RA:GetBossIds (raidID, bossid)
-			local spells = DetailsFramework:GetSpellsForEncounterFromJournal (raidID, bossEJID)
+			local spells = nil
 			
 		--	local ejid, combatlogid = Notepad:GetBossIds (raidID, bossid)
 		--	local spells = Notepad:GetBossSpellList (ejid)

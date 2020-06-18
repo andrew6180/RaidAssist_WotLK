@@ -189,7 +189,7 @@ function BisListRaid.BuildOptions (frame)
 		main_frame:Refresh()
 	end
 	
-	local dropdown_build_encounter_lsit = function()
+	local dropdown_build_encounter_list = function()
 		local isIn, type = IsInInstance()
 		local mapid
 		if (not isIn or type ~= "raid") then
@@ -206,7 +206,7 @@ function BisListRaid.BuildOptions (frame)
 	end
 	
 	local label_boss = BisListRaid:CreateLabel (main_frame, "Boss" .. ": ", BisListRaid:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
-	local dropdown_boss = BisListRaid:CreateDropDown (main_frame, dropdown_build_encounter_lsit, 1, 160, 20, "dropdown_boss_list", _, BisListRaid:GetTemplate ("dropdown", "OPTIONS_DROPDOWN_TEMPLATE"))
+	local dropdown_boss = BisListRaid:CreateDropDown (main_frame, dropdown_build_encounter_list, 1, 160, 20, "dropdown_boss_list", _, BisListRaid:GetTemplate ("dropdown", "OPTIONS_DROPDOWN_TEMPLATE"))
 	dropdown_boss:SetPoint ("left", label_boss, "right", 2, 0)
 	label_boss:SetPoint (10, -10)
 

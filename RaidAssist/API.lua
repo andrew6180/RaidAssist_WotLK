@@ -486,68 +486,109 @@ function RA:GetPlayerNameWithRealm()
 	return name
 end
 
+local faction_champ_id, gunship_id = 34467, 37540
+if UnitFactionGroup("player") == "Alliance" then 
+	faction_champ_id, gunship_id = 34451, 37215 
+end
+
 local ENCOUNTER_ID_MAP = {
-	[16028] = LBB["Patchwerk"]
+	[536] = { -- Naxxramas
+		[15956] = LBB["Anub'Rekhan"],
+		[15953] = LBB["Grand Widow Faerlina"],
+		[15952] = LBB["Maexxna"],
+		[15954] = LBB["Noth the Plaguebringer"],
+		[15936] = LBB["Heigan the Unclean"],
+		[16011] = LBB["Loatheb"],
+		[16061] = LBB["Instructor Razuvious"],
+		[16060] = LBB["Gothik the Harvester"],
+		[30549] = LBB["The Four Horsemen"],
+		[16028] = LBB["Patchwerk"],
+		[15931] = LBB["Grobbulus"],
+		[15932] = LBB["Gluth"],
+		[15928] = LBB["Thaddius"],
+		[15989] = LBB["Sapphiron"],
+		[15990] = LBB["Kel'Thuzad"],
+	},
+	[532] = { -- Obsidian Sanctum
+		[28860] = LBB["Sartharion"],
+	},
+	[528] = { 
+        [28859] = LBB["Malygos"],
+    },
+	[530] = { -- Ulduar
+		[33113] = LBB["Flame Leviathan"],
+		[33118] = LBB["Ignis the Furnace Master"],
+		[33186] = LBB["Razorscale"],
+		[33293] = LBB["XT-002 Deconstructor"],
+		[32867] = LBB["Assembly of Iron"],
+		[32930] = LBB["Kologarn"],
+		[33515] = LBB["Auriaya"],
+		[32845] = LBB["Hodir"],
+		[32865] = LBB["Thorim"],
+		[32906] = LBB["Freya"],
+		[33350] = LBB["Mimiron"],
+		[33271] = LBB["General Vezax"],
+		[33136] = LBB["Yogg-Saron"],
+		[32871] = LBB["Algalon the Observer"],
+	},
+	[544] = { -- ToC
+		[34797] = LBB["The Beasts of Northrend"],
+		[34780] = LBB["Lord Jaraxxus"],
+		[faction_champ_id] = LBB["Faction Champions"],
+		[34497] = LBB["The Twin Val'kyr"],
+		[34564] = LBB["Anub'arak"],
+	},
+	[605] = { -- Icecrown Citadel 
+		[36612] = LBB["Lord Marrowgar"],
+		[36855] = LBB["Lady Deathwhisper"],
+		[gunship_id] = LBB["Icecrown Gunship Battle"],
+		[37813] = LBB["Deathbringer Saurfang"],
+		[36626] = LBB["Festergut"],
+		[36627] = LBB["Rotface"],
+		[36678] = LBB["Professor Putricide"],
+		[37970] = LBB["Blood Prince Council"],
+		[37955] = LBB["Blood-Queen Lana'thel"],
+		[36789] = LBB["Valithria Dreamwalker"],
+		[36853] = LBB["Sindragosa"],
+		[36597] = LBB["The Lich King"],
+	},
+	[610] = { -- Ruby Sanctum
+		[39863] = LBB["Halion"],
+	},
 }
 --[=[
 	GetEncounterName (encounter_id)
 	return the encounter name from a encounter id.
 --]=]
 function RA:GetEncounterName (encounterId)
-	return ENCOUNTER_ID_MAP[encounterId] or ""
+	for _, encounters in pairs(ENCOUNTER_ID_MAP) do 
+		if encounters[encounterId] then 
+			return encounters[encounterId]
+		end
+	end
+	return ""
 end
 
+function RA:GetRaidEncounterName (mapID, encounterID)
+	return ENCOUNTER_ID_MAP[mapID] and ENCOUNTER_ID_MAP[mapID] [encounterID] 
+end
 --[=[
 	GetCurrentRaidEncounterList()
 	return a table with encounter names from the current raid.
 --]=]
 
-local raid_list = {
-	-- [mapid from GetInstanceInfo()] = {ejid, {cleu ids}}
-	[1861] = {1031, {2144, 2141, 2128, 2136, 2134, 2145, 2135, 2122}}, --uldir
-	[2070] = {1176, {2265, 2263, 2266, 2271, 2268, 2272, 2276, 2280, 2281}}, --battle for dazar'alor
-	
-	--the eternal palace
-	
-	--{MapID} = { instanceIJID , {Cleu IDs}},
-	--2298 Abyssal Commander Sivara
-	--2305 radiance of azshara
-	--2289 blackwater behemoth
-	--2304 lady sahvane
-	--2303 orgozoa
-	--2311 the queen's court
-	--2293 za'qul
-	--2299 queen azshara
-	--
-	
-	--instance info maop id | ejid | cleu boss combat log ids
-	[2164] = {1179, {2298, 2305, 2289, 2304, 2303, 2311, 2293, 2299}},
-	
-}
-
 
 local empty_table = {}
 function RA:GetCurrentRaidEncounterList (mapid)
-	local zoneName, zoneType, _, _, _, _, _, zoneMapID = GetInstanceInfo()
-	if (mapid) then
-		zoneMapID = mapid
+	if not mapid then 
+		mapid = GetCurrentMapAreaID()
 	end
-	local EJ_id, true_encounter_ids = unpack (raid_list [zoneMapID] or empty_table)
-	if (EJ_id) then
-		DF.EncounterJournal.EJ_SelectInstance (EJ_id)
-		local bosses = {}
-		for i = 1, 99 do
-			local boss_name = DF.EncounterJournal.EJ_GetEncounterInfoByIndex (i, EJ_id)
-			if (boss_name) then
-				tinsert (bosses, {boss_name, true_encounter_ids [i]})
-			else
-				break
-			end
-		end
-		return bosses
-	else
-		return {}
+	local bosses = {}
+	local encounters = ENCOUNTER_ID_MAP[mapid] or empty_table
+	for id, name in pairs(encounters) do
+		tinsert(bosses, {name, id})
 	end
+	return bosses
 end
 
 --[=[
@@ -633,20 +674,6 @@ end
 --]=]
 
 local boss_spells = { --[boss EJID] = {spellIDs}
-
-	[2031] = { --argus
-		248165,
-		248396,
-		257299,
-		248317,
-		251570,
-		255826,
-		258399,
-		250669,
-		248499,
-		257296,
-	},
-
 }
 
 function RA:GetBossSpellList (ej_id)
@@ -660,92 +687,72 @@ end
 --]=]
 local encounter_journal = {
 	--[instance EJID] { [boss EJID] = Combatlog ID}
-	
-	--Uldir
-	[1031] = {
-		2168, 2167, 2146, 2169, 2166, 2195, 2194, 2147,
-		[2168] = 2144, --Taloc
-		[2167] = 2141, --MOTHER
-		[2146] = 2128, --Fetid Devourer
-		[2169] = 2136, --Zek'voz, Herald of N'zoth
-		[2166] = 2134, --Vectis
-		[2195] = 2145, --Zul, Reborn
-		[2194] = 2135, --Mythrax the Unraveler
-		[2147] = 2122, --G'huun
+	[536] = { -- Naxxramas
+		[15956] = 15956,
+		[15953] = 15953,
+		[15952] = 15952,
+		[15954] = 15954,
+		[15936] = 15936,
+		[16011] = 16011,
+		[16061] = 16061,
+		[16060] = 16060,
+		[30549] = 30549,
+		[16028] = 16028,
+		[15931] = 15931,
+		[15932] = 15932,
+		[15928] = 15928,
+		[15989] = 15989,
+		[15990] = 15990,
 	},
-	
-	--Battle of Daraz'alor
-	[1176] = {
-		2333, 2325, 2341, 2342, 2330, 2335, 2334, 2337, 2343,
-		[2333] = 2265, --Champion of the Light
-		[2325] = 2263, --Grong, the Jungle Lord
-		[2341] = 2266, --Jadefire Masters
-		[2342] = 2271, --Opulence
-		[2330] = 2268, --Conclave of the Chosen
-		[2335] = 2272, --King Rastakhan
-		[2334] = 2276, --High Tinker Mekkatorque
-		[2337] = 2280, --Stormwall Blockade
-		[2343] = 2281, --Lady Jaina Proudmoore
+	[532] = { -- Obsidian Sanctum
+		[28860] = 28860,
 	},
-	
-	[1179] = {
-		2298, 2305, 2289, 2304, 2303, 2311, 2293, 2299,
-		[2352] = 2298, --Abyssal Commander Sivara
-		[2347] = 2289, --Blackwater Behemoth
-		[2353] = 2305, --Radiance of Azshara
-		[2354] = 2304, --Lady Ashvane
-		[2351] = 2303, --Orgozoa
-		[2359] = 2311, --The Queen's Court
-		[2349] = 2293, --Za'qul, Harbinger of Ny'alotha
-		[2361] = 2299, --Queen Azshara
-
+	[528] = { 
+        [28859] = 28859,
+    },
+	[530] = { -- Ulduar
+		[33113] = 33113,
+		[33118] = 33118,
+		[33186] = 33186,
+		[33293] = 33293,
+		[32867] = 32867,
+		[32930] = 32930,
+		[33515] = 33515,
+		[32845] = 32845,
+		[32865] = 32865,
+		[32906] = 32906,
+		[33350] = 33350,
+		[33271] = 33271,
+		[33136] = 33136,
+		[32871] = 32871,
+	},
+	[544] = { -- ToC
+		[34797] = 34797,
+		[34780] = 34780,
+		[faction_champ_id] = faction_champ_id,
+		[34497] = 34497,
+		[34564] = 34564,
+	},
+	[605] = { -- Icecrown Citadel 
+		[36612] = 36612,
+		[36855] = 36855,
+		[gunship_id] = gunship_id,
+		[37813] = 37813,
+		[36626] = 36626,
+		[36627] = 36627,
+		[36678] = 36678,
+		[37970] = 37970,
+		[37955] = 37955,
+		[36789] = 36789,
+		[36853] = 36853,
+		[36597] = 36597,
+	},
+	[610] = { -- Ruby Sanctum
+		[39863] = 39863,
 	},
 }
 
-local combat_log_ids = {
-	--[instance EJID] = { --[boss Combatlog ID] = boss EJID}
-	
-	--Uldir
-	[1031] = {
-		2144, 2141, 2128, 2136, 2134, 2145, 2135, 2122,
-		[2144] = 2168, --Taloc
-		[2141] = 2167, --MOTHER
-		[2128] = 2146, --Fetid Devourer
-		[2136] = 2169, --Zek'voz
-		[2134] = 2166, --Vectis
-		[2145] = 2195, --Zul
-		[2135] = 2194, --Mythrax the Unraveler
-		[2122] = 2147, --G'huun
-	},
-	
-	--Battle of Daraz'alor
-	[1176] = {
-		2265, 2263, 2266, 2271, 2268, 2272, 2276, 2280, 2281,
-		[2265] = 2333, --Champion of the Light
-		[2263] = 2325, --Grong, the Jungle Lord
-		[2266] = 2341, --Jadefire Masters
-		[2271] = 2342, --Opulence
-		[2268] = 2330, --Conclave of the Chosen
-		[2272] = 2335, --King Rastakhan
-		[2276] = 2334, --High Tinker Mekkatorque
-		[2280] = 2337, --Stormwall Blockade
-		[2281] = 2343, --Lady Jaina Proudmoore
-	},
-	
-	[1179] = {
-		2352, 2347, 2353, 2354, 2351, 2359, 2349, 2361,
-		[2352] = 2352, --Abyssal Commander Sivara
-		[2347] = 2347, --Blackwater Behemoth
-		[2353] = 2353, --Radiance of Azshara
-		[2354] = 2354, --Lady Ashvane
-		[2351] = 2351, --Orgozoa
-		[2359] = 2359, --The Queen's Court
-		[2349] = 2349, --Za'qul, Harbinger of Ny'alotha
-		[2361] = 2361, --Queen Azshara
-
-	},
-
-}
+local combat_log_ids = encounter_journal -- ids are the same anyway
 
 function RA:GetRegisteredRaids()
 	return encounter_journal
