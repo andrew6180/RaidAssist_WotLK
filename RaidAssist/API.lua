@@ -478,7 +478,12 @@ end
 --]=]
 
 function RA:GetPlayerNameWithRealm()
-	return UnitName ("player")
+	local name, realmName = UnitName ("player")
+	if (realmName == "" or realmName == nil) then
+		realmName = GetRealmName()
+	end
+	name = name.."-"..realmName
+	return name
 end
 
 local ENCOUNTER_ID_MAP = {

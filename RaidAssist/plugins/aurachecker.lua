@@ -296,6 +296,8 @@ function AuraCheck.BuildOptions (frame)
 		auraScroll:SetSize (180, CONST_AURALIST_ROWS*21 - 5)
 		auraScroll.CurrentAuraSelected = "-none-"
 		auraScroll.SearchingFor = ""
+		auraScroll:EnableMouseWheel(true)
+		auraScroll:EnableMouse(true)
 		
 		DetailsFramework:ReskinSlider (auraScroll)
 
@@ -347,6 +349,7 @@ function AuraCheck.BuildOptions (frame)
 			f:SetBackdrop (backdrop)
 			f:SetBackdropColor (unpack (backdropColor))
 			f.LastClick = 0
+			f:EnableMouse(true)
 			local label = f:CreateFontString (nil, "overlay", "GameFontNormal")
 			label:SetPoint ("left", f, "left", 2, 0)
 			AuraCheck:SetFontSize (label, 10)
@@ -438,7 +441,7 @@ function AuraCheck.BuildOptions (frame)
 					end
 				end
 			elseif (IsInGroup()) then
-				for i = 1, GetNumGroupMembers() - 1 do
+				for i = 1, GetNumGroupMembers() do
 					local playerName, realmName = UnitName ("party" .. i)
 					if (realmName == "" or realmName == nil) then
 						realmName = GetRealmName()
@@ -531,7 +534,7 @@ function AuraCheck.BuildOptions (frame)
 				end
 				
 			elseif (IsInGroup()) then
-				for i = 1, GetNumGroupMembers() - 1 do
+				for i = 1, GetNumGroupMembers() do
 					local playerName, realmName = UnitName ("party" .. i)
 					if (realmName == "" or realmName == nil) then
 						realmName = GetRealmName()
