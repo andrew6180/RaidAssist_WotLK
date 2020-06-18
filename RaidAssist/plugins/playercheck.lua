@@ -31,7 +31,7 @@ local COMM_RECEIVED_DATA = "PCD"
 local COMM_RECEIVED_LATENCY = "PCL"
 
 local icon_texcoord = {l=0, r=1, t=0, b=1}
-local icon_texture = [[Interface\CURSOR\thumbsup]]
+local icon_texture = "Interface\\AddOns\\" .. RA.InstallDir .. "\\media\\THUMBSUP"
 local text_color_enabled = {r=1, g=1, b=1, a=1}
 local text_color_disabled = {r=0.5, g=0.5, b=0.5, a=1}
 
@@ -428,7 +428,7 @@ function PlayerCheck.BuildOptions (frame)
 	end
 	frame.FirstRun = true
 	
-	local fill_panel = PlayerCheck:CreateFillPanel (frame, {}, 790, 460, false, false, false, {rowheight = 16}, "fill_panel", "PlayerCheckFillPanel")
+	local fill_panel = PlayerCheck:CreateFillPanel (frame, {}, 600, 460, false, false, false, {rowheight = 16}, "fill_panel", "PlayerCheckFillPanel")
 	PlayerCheck.fill_panel = fill_panel
 	fill_panel:SetPoint ("topleft", frame, "topleft", 10, 0)
 

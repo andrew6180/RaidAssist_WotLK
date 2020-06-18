@@ -14,7 +14,7 @@ local default_config = {
 local text_color_enabled = {r=1, g=1, b=1, a=1}
 local text_color_disabled = {r=0.5, g=0.5, b=0.5, a=1}
 
-local toolbar_icon = [[Interface\CHATFRAME\UI-ChatIcon-Share]]
+local toolbar_icon = [[Interface\Buttons\UI-GroupLoot-Coin-Up]]
 local icon_texcoord = {l=0, r=1, t=0, b=1}
 
 local RAID_TIERS = {

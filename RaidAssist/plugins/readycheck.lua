@@ -15,10 +15,10 @@ local default_config = {
 	text_shadow = false,
 }
 
-local icon_texcoord = {l=64/512, r=96/512, t=0, b=1}
+local icon_texcoord = {l=0, r=1, t=0, b=1}
 local text_color_enabled = {r=1, g=1, b=1, a=1}
 local text_color_disabled = {r=0.5, g=0.5, b=0.5, a=1}
-local icon_texture = "Interface\\AddOns\\" .. RA.InstallDir .. "\\media\\plugin_icons"
+local icon_texture = "Interface\\AddOns\\" .. RA.InstallDir .. "\\media\\Check"
 
 if (_G ["RaidAssistReadyCheck"]) then
 	return

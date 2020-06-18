@@ -19,8 +19,8 @@ local default_config = {
 local text_color_enabled = {r=1, g=1, b=1, a=1}
 local text_color_disabled = {r=0.5, g=0.5, b=0.5, a=1}
 
-local toolbar_icon = [[Interface\CastingBar\UI-CastingBar-Border]]
-local icon_texcoord = {l=25/256, r=80/256, t=14/64, b=49/64}
+local toolbar_icon = [[Interface\TARGETINGFRAME\UI-RaidTargetingIcon_8]]
+local icon_texcoord = {l=0, r=1, t=0, b=1}
 
 if (_G ["RaidAssistLeaderToolbar"]) then
 	return
@@ -68,7 +68,7 @@ function LeaderToolbar.CanShow()
 		end
 	end
 	if (LeaderToolbar.db.hide_not_in_group) then
-		if (not IsInGroup()) then
+		if (not IsInRaid() and not IsInGroup()) then
 			can_show = false
 		end
 	end
@@ -181,7 +181,7 @@ end
 function LeaderToolbar.CreateScreenPanel()
 
 	local ScreenPanel = LeaderToolbar:CreateCleanFrame (LeaderToolbar, "LeaderToolbarScreenFrame")
-	ScreenPanel:SetSize (396, 23)
+	ScreenPanel:SetSize (396, 26)
 	LeaderToolbar.ScreenPanel = ScreenPanel
 	
 	DetailsFramework:ApplyStandardBackdrop (ScreenPanel)
@@ -283,14 +283,14 @@ function LeaderToolbar.CreateScreenPanel()
 	local status_button = LeaderToolbar:CreateButton (ScreenPanel, open_raidstatus, 50, 20, "Status", _, _, _, "status_button", _, "none", button_template)
 	status_button:SetPoint ("left", reset_button, "right", 2, 0)
 	local status_frame = CreateFrame ("frame", nil, UIParent)
-	status_frame:SetSize (790, 460)
+	status_frame:SetSize (600, 460)
 	status_frame:SetFrameStrata ("TOOLTIP")
 	status_frame:SetClampedToScreen (true)
 	status_frame:SetBackdrop (button_template.backdrop)
 	status_frame:SetBackdropColor (unpack (button_template.backdropcolor))
 	status_frame:SetBackdropColor (0, 0, 0, 1)
 	status_frame:SetBackdropBorderColor (unpack (button_template.backdropbordercolor))
-	local fill_panel = LeaderToolbar:CreateFillPanel (status_frame, {}, 790, 460, false, false, false, {rowheight = 16}, "fill_panel", "PlayerCheckScreenFillPanel")
+	local fill_panel = LeaderToolbar:CreateFillPanel (status_frame, {}, 600, 460, false, false, false, {rowheight = 16}, "fill_panel", "PlayerCheckScreenFillPanel")
 	fill_panel:SetPoint ("topleft", status_frame, "topleft", 0, 0)
 
 	status_button:SetHook ("OnEnter", function()
