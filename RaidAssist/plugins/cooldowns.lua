@@ -1653,7 +1653,7 @@ function Cooldowns.BuildOptions (frame)
 			background.spellid = spellid
 		
 			local func = function (self, fixedparam, value) Cooldowns.db.cooldowns_enabled [spellid] = value; Cooldowns.BarControl ("roster_update") end
-			local checkbox, label = Cooldowns:CreateSwitch (main_frame, func, Cooldowns.db.cooldowns_enabled [spellid], 64, 64, _, _, _, "CooldownsDropdown" .. spellid .. "External", _, func, nil, "|T" .. spellicon .. ":14:14:0:0:64:64:5:59:5:59|t " .. spellname, Cooldowns:GetTemplate ("switch", "OPTIONS_CHECKBOX_TEMPLATE"), Cooldowns:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
+			local checkbox, label = Cooldowns:CreateSwitch (main_frame, func, Cooldowns.db.cooldowns_enabled [spellid], 64, 64, _, _, _, "CooldownsDropdown" .. spellid .. "External", _, nil, nil, "|T" .. spellicon .. ":14:14:0:0:64:64:5:59:5:59|t " .. spellname, Cooldowns:GetTemplate ("switch", "OPTIONS_CHECKBOX_TEMPLATE"), Cooldowns:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
 			checkbox:SetAsCheckBox()
 			checkbox.tooltip = format (L["S_PLUGIN_COOLDOWNS_SPELLNAME"], spellname)
 			checkbox:ClearAllPoints(); label:ClearAllPoints()
