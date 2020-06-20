@@ -459,7 +459,7 @@ local do_capture_tick = function (tick_object)
 	
 	for i = 1, GetNumGuildMembers() do 
 		local name, _, rank_id = GetGuildRosterInfo(i)
-		if name and rank_id and not Attendance.db.ingore_rank[rank_id] then 
+		if name and rank_id and not Attendance.db.ignore_rank[rank_id] then 
 			player_table [name] = (player_table [name] or 0) + 1
 			amt_player = amt_player + 1
 			if not name_pool [name] then 

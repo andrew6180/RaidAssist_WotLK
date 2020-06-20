@@ -895,7 +895,7 @@ end
 function Invite:CheckRaidLeaderForPreset (preset)
 	if (preset.raidleader and preset.raidleader ~= "") then
 		local ImLeader = UnitIsGroupLeader ("player")
-		if (ImLeader and UnitInRaid (preset.raidleader)) then
+		if (ImLeader and UnitInRaid (preset.raidleader) and UnitName("player") ~= preset.raidleader) then
 			PromoteToLeader (preset.raidleader)
 			print ("Promoting ", preset.raidleader, "to leader.")
 			-- promote leader to master loot
