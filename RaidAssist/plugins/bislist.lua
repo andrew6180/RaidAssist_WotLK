@@ -411,8 +411,9 @@ function BisList.BuildOptions (frame)
 	end
 	local empty_func = function() end
 
-	
-
+	local label =  BisList:CreateLabel (main_frame, "Enter an item's ID on the right to search for it", BisList:GetTemplate ("font", "ORANGE_FONT_TEMPLATE"))
+	label:SetPoint("topleft", main_frame, "topleft")
+	BisList:SetFontSize(label, 18)
 	local backdrop_table = {bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tileSize = 64, tile = true}
 	for i = 1, 17 do
 		local label_slot_name =  BisList:CreateLabel (main_frame, slot_list [i] .. ":", BisList:GetTemplate ("font", "ORANGE_FONT_TEMPLATE"))
@@ -424,7 +425,7 @@ function BisList.BuildOptions (frame)
 		local label_item_name = BisList:CreateLabel (background, "", BisList:GetTemplate ("font", "ORANGE_FONT_TEMPLATE"))
 		local label_encounter_name = BisList:CreateLabel (background, "", BisList:GetTemplate ("font", "ORANGE_FONT_TEMPLATE"))
 		
-		local y = (-i * 21) - 15
+		local y = (-i * 25) - 20
 		
 		label_slot_name:SetPoint ("topleft", main_frame, "topleft", 10, y)
 		label_item_name:SetPoint ("topleft", main_frame, "topleft", 75, y)

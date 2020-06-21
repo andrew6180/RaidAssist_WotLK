@@ -2,6 +2,10 @@
 
 [Raid Assist](https://www.curseforge.com/wow/addons/raid-assist) is a raid tool collection. 
 
+## If you're using loot council 
+
+[RCLootCouncil-WotLK](https://github.com/ajseward/RcLootCouncil-Wotlk) integrates with your bis list to display if you need an item for bis or not.
+
 
 # Additional Changes / Features
 
