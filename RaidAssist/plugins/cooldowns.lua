@@ -122,10 +122,11 @@ local get_unit_name = function (unitid)
 end
 
 function Cooldowns:COMBAT_LOG_EVENT_UNFILTERED(self, time, event, who_guid, who_name, who_flags, target_guid, targeT_name, target_flags, spellid, ...)
-	if event == "SPELL_CAST_SUCCESS" or event == "SPELL_RESURRECT" then 
-		if who_name and who_name ~= "" and who_guid and spellid then
-			Cooldowns.HandleSpellCast (event, who_name, who_guid, spellid)
-		end
+	if event == "SPELL_CAST_FAILED" then -- not sure if this is everything to be filtered out but we'll see.
+		return 
+	end
+	if who_name and who_name ~= "" and who_guid and spellid then
+		Cooldowns.HandleSpellCast (event, who_name, who_guid, spellid)
 	end
 end
 --[=[
