@@ -28,8 +28,10 @@ _G ["RaidAssistReadyCheck"] = ReadyCheck
 
 ReadyCheck.debug = false
 
+local COMM_READY_CHECK = "RCS"
 local COMM_READY_CHECK_CONFIRM = "RCC" 
 local COMM_READY_CHECK_FINISHED = "RCF"
+
 ReadyCheck.menu_text = function (plugin)
 	if (ReadyCheck.db.enabled) then
 		return icon_texture, icon_texcoord, "Ready Check", text_color_enabled
@@ -328,9 +330,16 @@ end
 function ReadyCheck:READY_CHECK (event, player, timeout)
 	
 	--print (timeout)
-	
 	--ready check started
 	if (ReadyCheck.db.enabled) then
+
+		if ReadyCheck.From.player == UnitName("player") then 
+			ReadyCheck:SendPluginCommMessage(COMM_READY_CHECK, "RAID", nil, nil, player, timeout)
+		end
+		
+		if not UnitIsGroupLeader("player") and event ~= "RAA_READY_CHECK_COMM" then -- let raid broadcast to non officers
+			return 
+		end
 		ReadyCheck.AnswerTable = ReadyCheck.AnswerTable or {}
 		wipe (ReadyCheck.AnswerTable)
 
@@ -378,25 +387,20 @@ end
 function ReadyCheck:READY_CHECK_CONFIRM (event, player, status, arg4, arg5)
 	
 	player = UnitName(player)
-	print(event, player, status)
 	-- retornou false pra n�o pronto
 	-- retornou true para pronto
 	if (ReadyCheck.db.enabled and ReadyCheck.AnswerTable and ReadyCheck.ScreenPanel) then
 		local PlayerName = player
-		if (PlayerName and ReadyCheck.AnswerTable [PlayerName] ~= nil) then
+		if (PlayerName and ReadyCheck.AnswerTable [PlayerName] == "afk") then
 			if (not status and ReadyCheck.ScreenPanel.StartAt and ReadyCheck.ScreenPanel.StartAt + 0.3 and not UnitIsConnected (player)) then
 				ReadyCheck.AnswerTable [PlayerName] = "offline"
 			elseif (ReadyCheck.AnswerTable [PlayerName] ~= "offline") then
-				if (ReadyCheck.AnswerTable [PlayerName] == false and status == false) then
-					--if (ReadyCheck.ScreenPanel.EndAt -1 > GetTime()) then --isn't sending answers at the end
-						ReadyCheck.AnswerTable [PlayerName] = status
-					--end
-				else
-					ReadyCheck.AnswerTable [PlayerName] = status
-				end
+				ReadyCheck.AnswerTable [PlayerName] = status
 			end
 			if ReadyCheck.From.player == UnitName("player") then 
 				ReadyCheck:SendPluginCommMessage(COMM_READY_CHECK_CONFIRM, "RAID", nil, nil, player, status)
+			elseif not status then
+				print ("|cFFFFFF00" .. PlayerName .. " is not ready|r")
 			end
 		end
 	end
@@ -416,11 +420,23 @@ function ReadyCheck:READY_CHECK_FINISHED (event, arg2, arg3)
 
 	if ReadyCheck.From.player == UnitName("player") then 
 		ReadyCheck:SendPluginCommMessage(COMM_READY_CHECK_FINISHED, "RAID")
+	else
+		local all_ready = true
+		for _, status in pairs(ReadyCheck.AnswerTable) do 
+			if status ~= true then
+				all_ready = false
+				print ("|cFFFFFF00Ready check finished|r")
+				break
+			end
+		end
+		if all_ready then
+			print ("|cFFFFFF00Everyone is Ready|r")
+		end
 	end
 	C_Timer.After (1, finished_func)
 
 	if (ReadyCheck.db.enabled) then
-		print (event, arg2, arg3)
+		--print (event, arg2, arg3)
 	end
 	
 end
@@ -443,8 +459,9 @@ function ReadyCheck.OnReceiveComm (prefix, sourcePluginVersion, player, status)
 	if UnitIsGroupLeader("player") then 
 		return 
 	end
-
-	if (prefix == COMM_READY_CHECK_CONFIRM) then 
+	if (prefix == COMM_READY_CHECK) then 
+		ReadyCheck:READY_CHECK("RAA_READY_CHECK_COMM", player, status)
+	elseif (prefix == COMM_READY_CHECK_CONFIRM) then 
 		ReadyCheck:READY_CHECK_CONFIRM("READY_CHECK_CONFIRM", player, status)
 	elseif (prefix == COMM_READY_CHECK_FINISHED) then
 		ReadyCheck:READY_CHECK_FINISHED("READY_CHECK_FINISHED")
@@ -453,3 +470,4 @@ end
 
 RA:RegisterPluginComm (COMM_READY_CHECK_CONFIRM, ReadyCheck.OnReceiveComm)
 RA:RegisterPluginComm (COMM_READY_CHECK_FINISHED, ReadyCheck.OnReceiveComm)
+RA:RegisterPluginComm (COMM_READY_CHECK, ReadyCheck.OnReceiveComm)
