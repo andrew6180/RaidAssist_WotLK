@@ -78,7 +78,7 @@ local specIDs = {
 	["WARRIOR"] = {71, 72, 73},
 	["PALADIN"] = {65, 66, 70},
 	["DEATHKNIGHT"] = {250, 251, 252},
-	["DRUID"] = {102, 103, 103, 105},
+	["DRUID"] = {102, 103, 105},
 	["HUNTER"] = {253, 254, 255},
 	["SHAMAN"] = {262, 263, 264},
 }
@@ -3572,7 +3572,6 @@ DF.ClassSpecs = {
 	["DRUID"] = {
 		[102] = true,
 		[103] = true,
-		[104] = true,
 		[105] = true,
 	},
 	["HUNTER"] = {
