@@ -980,7 +980,7 @@ function Cooldowns.BarControlUpdatePanelSpells (panel, cooldown_raid, cooldown_e
 	for class, classtable in pairs (spell_list) do
 		for specid, spectable in pairs (classtable) do
 			for spellid, spelltable in pairs (spectable) do
-				if (cd_enabled [spellid] and (cooldown_raid and spelltable.type == DF_COOLDOWN_RAID) or (cooldown_external and spelltable.type == DF_COOLDOWN_EXTERNAL)) then
+				if (cd_enabled [spellid] and ((cooldown_raid and spelltable.type == DF_COOLDOWN_RAID) or (cooldown_external and spelltable.type == DF_COOLDOWN_EXTERNAL))) then
 					panel.Spells [spellid] = true
 				end
 			end
