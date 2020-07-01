@@ -5,8 +5,6 @@ local L = LibStub ("AceLocale-3.0"):GetLocale ("RaidAssistAddon")
 local _ 
 local default_priority = 19
 
-local LibGroupInSpecT = LibStub:GetLibrary ("LibGroupInSpecT-1.1")
-
 if (_G ["RaidAssistPlayerCheck"]) then
 	return
 end
@@ -119,7 +117,6 @@ PlayerCheck.OnInstall = function (plugin)
 	PlayerCheck:RegisterPluginComm (COMM_REQUEST_DATA, PlayerCheck.PluginCommReceived)
 	PlayerCheck:RegisterPluginComm (COMM_RECEIVED_DATA, PlayerCheck.PluginCommReceived)
 	PlayerCheck:RegisterPluginComm (COMM_RECEIVED_LATENCY, PlayerCheck.PluginCommReceived)
-	LibGroupInSpecT.RegisterCallback (PlayerCheck, "GroupInSpecT_Update", "LibGroupInSpecT_UpdateReceived")
 	
 	main_frame:RegisterEvent ("PARTY_MEMBERS_CHANGED")
 	main_frame:RegisterEvent ("RAID_ROSTER_UPDATE")
@@ -170,7 +167,6 @@ PlayerCheck.OnDisable = function (plugin)
 	PlayerCheck:UnregisterPluginComm (COMM_REQUEST_DATA, PlayerCheck.PluginCommReceived)
 	PlayerCheck:UnregisterPluginComm (COMM_RECEIVED_DATA, PlayerCheck.PluginCommReceived)
 	PlayerCheck:UnregisterPluginComm (COMM_RECEIVED_LATENCY, PlayerCheck.PluginCommReceived)
-	LibGroupInSpecT.UnregisterCallback (PlayerCheck, "GroupInSpecT_Update")
 	PlayerCheck.main_frame:UnregisterEvent ("PARTY_MEMBERS_CHANGED")
 	PlayerCheck.main_frame:UnregisterEvent ("RAID_ROSTER_UPDATE")
 	PlayerCheck:StopLatencyTicker()

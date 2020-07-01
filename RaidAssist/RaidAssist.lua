@@ -96,7 +96,19 @@ if not Details and not C_Timer or C_Timer._version ~= 2 then
 end
 
 if not Details then -- defer to details imp because they're probably more up to date tbh
-		local oldGetInstanceDifficulty = GetInstanceDifficulty
+
+	RAID_CLASS_COLORS.HUNTER.colorStr = "ffabd473"
+	RAID_CLASS_COLORS.WARLOCK.colorStr = "ff8788ee"
+	RAID_CLASS_COLORS.PRIEST.colorStr = "ffffffff"
+	RAID_CLASS_COLORS.PALADIN.colorStr = "fff58cba"
+	RAID_CLASS_COLORS.MAGE.colorStr = "ff3fc7eb"
+	RAID_CLASS_COLORS.ROGUE.colorStr = "fffff569"
+	RAID_CLASS_COLORS.DRUID.colorStr = "ffff7d0a"
+	RAID_CLASS_COLORS.SHAMAN.colorStr = "ff0070de"
+	RAID_CLASS_COLORS.WARRIOR.colorStr = "ffc79c6e"
+	RAID_CLASS_COLORS.DEATHKNIGHT.colorStr = "ffc41f3b"
+
+	local oldGetInstanceDifficulty = GetInstanceDifficulty
 	function GetInstanceDifficulty()
 		local diff = oldGetInstanceDifficulty()
 		if diff == 1 then
@@ -208,9 +220,6 @@ RA.InstallDir = FOLDERPATH
 do
 	local serialize = LibStub ("AceSerializer-3.0")
 	serialize:Embed (RA)
-
-	--what to do with this
-	local LGIST = LibStub:GetLibrary("LibGroupInSpecT-1.1")
 end
 
 RA.__index = RA

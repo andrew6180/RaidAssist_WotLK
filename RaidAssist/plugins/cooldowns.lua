@@ -2,7 +2,6 @@
 local RA = RaidAssist
 local DF = DetailsFramework
 local L = LibStub ("AceLocale-3.0"):GetLocale ("RaidAssistAddon")
-local LibGroupInSpecT = LibStub:GetLibrary ("LibGroupInSpecT-1.1")
 local LibGroupTalents = LibStub:GetLibrary ("LibGroupTalents-1.0")
 local default_priority = 9
 local _ 
@@ -910,7 +909,6 @@ function Cooldowns.ShowPanelInScreen (panel, show, event)
 			end
 			if (can_turnoff) then
 				Cooldowns:UnregisterEvent ("PARTY_MEMBERS_CHANGED")
-				LibGroupInSpecT.UnregisterCallback (Cooldowns, "GroupInSpecT_Update")
 				Cooldowns.RosterIsEnabled = false
 				if (Cooldowns.HealthCheck) then
 					Cooldowns.HealthCheck:Cancel()

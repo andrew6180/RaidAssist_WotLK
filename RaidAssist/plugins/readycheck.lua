@@ -28,6 +28,8 @@ _G ["RaidAssistReadyCheck"] = ReadyCheck
 
 ReadyCheck.debug = false
 
+local COMM_READY_CHECK_CONFIRM = "RCC" 
+local COMM_READY_CHECK_FINISHED = "RCF"
 ReadyCheck.menu_text = function (plugin)
 	if (ReadyCheck.db.enabled) then
 		return icon_texture, icon_texcoord, "Ready Check", text_color_enabled
@@ -345,6 +347,7 @@ function ReadyCheck:READY_CHECK (event, player, timeout)
 		ReadyCheck.ProgressBar:SetTimer (timeout)
 		ReadyCheck.Waiting = amt
 		ReadyCheck.From.text = "From: " .. player
+		ReadyCheck.From.player = player
 		
 		local _, class = UnitClass (player)
 		if (class) then
@@ -374,13 +377,12 @@ end
 
 function ReadyCheck:READY_CHECK_CONFIRM (event, player, status, arg4, arg5)
 	
-	--print (event, player, UnitName (player), status, arg4, arg5)
-	
+	player = UnitName(player)
+	print(event, player, status)
 	-- retornou false pra n�o pronto
 	-- retornou true para pronto
-	
 	if (ReadyCheck.db.enabled and ReadyCheck.AnswerTable and ReadyCheck.ScreenPanel) then
-		local PlayerName = GetUnitName (player, true)
+		local PlayerName = player
 		if (PlayerName and ReadyCheck.AnswerTable [PlayerName] ~= nil) then
 			if (not status and ReadyCheck.ScreenPanel.StartAt and ReadyCheck.ScreenPanel.StartAt + 0.3 and not UnitIsConnected (player)) then
 				ReadyCheck.AnswerTable [PlayerName] = "offline"
@@ -392,6 +394,9 @@ function ReadyCheck:READY_CHECK_CONFIRM (event, player, status, arg4, arg5)
 				else
 					ReadyCheck.AnswerTable [PlayerName] = status
 				end
+			end
+			if ReadyCheck.From.player == UnitName("player") then 
+				ReadyCheck:SendPluginCommMessage(COMM_READY_CHECK_CONFIRM, "RAID", nil, nil, player, status)
 			end
 		end
 	end
@@ -409,10 +414,13 @@ end
 
 function ReadyCheck:READY_CHECK_FINISHED (event, arg2, arg3)
 
+	if ReadyCheck.From.player == UnitName("player") then 
+		ReadyCheck:SendPluginCommMessage(COMM_READY_CHECK_FINISHED, "RAID")
+	end
 	C_Timer.After (1, finished_func)
 
 	if (ReadyCheck.db.enabled) then
-		--print (event, arg2, arg3)
+		print (event, arg2, arg3)
 	end
 	
 end
@@ -429,3 +437,19 @@ function ReadyCheck:ENCOUNTER_START()
 end
 
 local install_status = RA:InstallPlugin ("Ready Check", "RAReadyCheck", ReadyCheck, default_config)
+
+
+function ReadyCheck.OnReceiveComm (prefix, sourcePluginVersion, player, status)
+	if UnitIsGroupLeader("player") then 
+		return 
+	end
+
+	if (prefix == COMM_READY_CHECK_CONFIRM) then 
+		ReadyCheck:READY_CHECK_CONFIRM("READY_CHECK_CONFIRM", player, status)
+	elseif (prefix == COMM_READY_CHECK_FINISHED) then
+		ReadyCheck:READY_CHECK_FINISHED("READY_CHECK_FINISHED")
+	end
+end	
+
+RA:RegisterPluginComm (COMM_READY_CHECK_CONFIRM, ReadyCheck.OnReceiveComm)
+RA:RegisterPluginComm (COMM_READY_CHECK_FINISHED, ReadyCheck.OnReceiveComm)
