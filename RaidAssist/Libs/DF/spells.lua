@@ -19,21 +19,21 @@ DF.CooldownsBySpec = {
 		[62]	= {
 			[12042] = 1, --Arcane Power
 			[55342] = 1, --Mirror Image
-			[45438] = 2, --Ice Block
+			[45438] = 3, --Ice Block
 			[12051] = 5, --Evocation
 		},
 		--fire
 		[63] = {
 			[190319] = 1, --Combustion
 			[55342] = 1, --Mirror Image
-			[45438] = 2, --Ice Block
+			[45438] = 3, --Ice Block
 			[66] = 5, --Invisibility
 		},
 		--frost
 		[64] = {
 			[12472] = 1, --Icy Veins
 			[55342] = 1, --Mirror Image
-			[45438] = 2, --Ice Block
+			[45438] = 3, --Ice Block
 			[66] = 5, --Invisibility
 			[11958] = 5, --Cold Snap
 		},
@@ -62,7 +62,7 @@ DF.CooldownsBySpec = {
 			[34433] = 1, --Shadowfiend
 			[64844] = 4, --Divine Hymn
 			[64901] = 4, --Hymn of Hope
-			[47585] = 2, --Dispersion
+			[47585] = 3, --Dispersion
 			[64044] = 5, --Psychic Horror
 			[8122] = 5, --Psychic Scream
 		},
@@ -95,18 +95,25 @@ DF.CooldownsBySpec = {
 	--WARLOCK
 		--affliction
 		[265] = {
+		        [47884] = 3, --Soul Stone
+		
 			[47847] = 5, --Shadowfury
 			[47860] = 5, --Death Coil
 		},
 		--demo
 		[266] = {
+		        [47884] = 3, --Soul Stone
+		
 			[47847] = 5, --Shadowfury
 			[47860] = 5, --Death Coil
 		},
 		--destro
 		[267] = {
 			[1122] = 1, --Summon Infernal
-			[47860] = 5, --Death Coil
+		
+		        [47884] = 3, --Soul Stone
+		
+		        [47860] = 5, --Death Coil
 			[47847] = 5, --Shadowfury
 		},
 
@@ -114,17 +121,19 @@ DF.CooldownsBySpec = {
 		--Arms
 		[71] = {
 			[46924] = 1, -- Bladestorm(talent)
+		        [871] = 3, --Shield Wall
 			[5246] = 5, --Intimidating Shout
 		},
 		--Fury
 		[72] = {
 			[1719] = 1, --Recklessness
+		        [871] = 3, --Shield Wall
 			[5246] = 5, --Intimidating Shout
 		},
 		--Protection
 		[73] = {
-			[12975] = 2, --Last Stand
-			[871] = 2, --Shield Wall
+			[12975] = 3, --Last Stand
+			[871] = 3, --Shield Wall
 			[5246] = 5, --Intimidating Shout
 		},
 
@@ -133,16 +142,16 @@ DF.CooldownsBySpec = {
 		[65] = {
 			[31884] = 1, --Avenging Wrath
 
-			[498] = 2, --Divine Protection
-			[642] = 2, --Divine Shield
+			[498] = 3, --Divine Protection
+			[642] = 3, --Divine Shield
 
-			[10278] = 3, --Blessing of Protection
+			[10278] = 3, --Hand of Protection
 			[48788] = 3, --Lay on Hands
 		    [6940] = 3, -- Hand of Sacrifice
 
 			[31821] = 4, --Aura Mastery
 
-			[1044] = 5, --Blessing of Freedom
+			[1044] = 3, --Hand of Freedom
 			[853] = 5, --Hammer of Justice
 		},
 
@@ -151,12 +160,16 @@ DF.CooldownsBySpec = {
 			[31884] = 1, --Avenging Wrath
 
 			[31850] = 2, --Ardent Defender
-			[10278] = 3, --Blessing of Protection
+			
+		        [10278] = 3, --Hand of Protection
+		        [498] = 3, --Divine Protection
+			[642] = 3, --Divine Shield
 			[6940] = 3, -- Hand of Sacrifice
 			[48788] = 3, --Lay on Hands
-			[64205] = 4, -- Divine Sacrifice
+			
+		        [64205] = 4, -- Divine Sacrifice
 
-			[1044] = 5, --Blessing of Freedom
+			[1044] = 3, --Hand of Freedom
 			[853] = 5, --Hammer of Justice
 		},
 
@@ -164,13 +177,13 @@ DF.CooldownsBySpec = {
 		[70] = {
 			[31884] = 1, --Avenging Wrath
 
-			[642] = 2, --Divine Shield
-
-			[10278] = 3, --Blessing of Protection
+			[642] = 3, --Divine Shield
+                        [498] = 3, --Divine Protection
+			[10278] = 3, --Hand of Protection
 			[48788] = 3, --Lay on Hands
 			[6940] = 3, -- Hand of Sacrifice
 
-			[1044] = 5, --Blessing of Freedom
+			[1044] = 3, --Hand of Freedom
 			[853] = 5, --Hammer of Justice
 		},
 
@@ -180,37 +193,39 @@ DF.CooldownsBySpec = {
 			[42650] = 1, --Army of the Dead
 			[49206] = 1, --Summon Gargoyle (talent)
 
-			[48792] = 2, --Icebound Fortitude
 			[48743] = 2, --Death Pact (talent)
+		
+		        [48792] = 3, --Icebound Fortitude
 
 		},
 		--frost
 		[251] = {
 			[47568] = 1, --Empower Rune Weapon
+		
+		        [48743] = 2, --Death Pact (talent)
 
-			[48792] = 2, --Icebound Fortitude
-			[48743] = 2, --Death Pact (talent)
+			[48792] = 3, --Icebound Fortitude
 		},
 		--blood
 		[250] = {
 			[49028] = 1, --Dancing Rune Weapon
 
-			[55233] = 2, --Vampiric Blood
-			[48792] = 2, --Icebound Fortitude
+			[55233] = 3, --Vampiric Blood(talent)
+			[48792] = 3, --Icebound Fortitude
 		},
 
 	--DRUID
 		--balance
 		[102] = {
-			[22812] = 2, --Barkskin
+			[22812] = 3, --Barkskin
 			[48447] = 4, --Tranquility
 			[29166] = 3, --Innervate
 			[48477] = 3, --Rebirth
 		},
 		--feral
 		[103] = {
-			[22812] = 2, --Barkskin
-			[61336] = 2, --Survival Instincts
+			[22812] = 3, --Barkskin
+			[61336] = 3, --Survival Instincts
 			[77764] = 4, --Stampeding Roar
 			[48447] = 4, --Tranquility
 			[29166] = 3, --Innervate
@@ -220,7 +235,7 @@ DF.CooldownsBySpec = {
 		--restoration
 		[105] = {
 
-			[22812] = 2, --Barkskin
+			[22812] = 3, --Barkskin
 			[33891] = 2, --Incarnation: Tree of Life (talent)
 			[29166] = 3, --Innervate
 
@@ -248,14 +263,20 @@ DF.CooldownsBySpec = {
 		--elemental
 		[262] = {
 			[16166] = 1, -- Elemental Mastery
+		        [2825] = 4, -- Bloodlust
+		        [32182] 4, -- Heroism
 		},
 		--enhancement
 		[263] = {
 			[51533] = 1, --Feral Spirit
+		        [2825] = 4, -- Bloodlust
+		        [32182] 4, -- Heroism
 		},
 		--restoration
 		[263] = {
 			[16190] = 3, -- Mana Tide Totem
+		        [2825] = 4, -- Bloodlust
+		        [32182] 4, -- Heroism
 		},
 }
 
@@ -263,29 +284,32 @@ DF.CooldownsBySpec = {
 DF.CooldownsInfo = {
 	--> paladin
 	[31884] = {cooldown = 120, duration = 20, talent = false, charges = 1, class = "PALADIN", type = 1}, --Avenging Wrath
-	[498] = {cooldown = 60, duration = 8, talent = false, charges = 1, class = "PALADIN", type = 2}, --Divine Protection
-	[642] = {cooldown = 300, duration = 8, talent = false, charges = 1, class = "PALADIN", type = 2}, --Divine Shield
+	[498] = {cooldown = 180, duration = 12, talent = false, charges = 1, class = "PALADIN", type = 3}, --Divine Protection
+	[642] = {cooldown = 300, duration = 12, talent = false, charges = 1, class = "PALADIN", type = 3}, --Divine Shield
 	[64205] = {cooldown = 120, duration = 10, talent = 64205, charges =1, class = "PALADIN", type = 4}, -- Divine Sacrifice
 	[10278] = {cooldown = 300, duration =10, talent = false, charges = 1, class = "PALADIN", type = 3}, -- Hand of Protection
 	[48788] = {cooldown = 660, duration = false, talent = false, charges = 1, class = "PALADIN", type = 3}, --Lay on Hands
 	[31821] = {cooldown = 120, duration = 8, talent = 31821, charges = 1, class = "PALADIN", type = 4}, --Aura Mastery
-	[1044] = {cooldown = 25, duration = 8, talent = false, charges = 1, class = "PALADIN", type = 5}, --Blessing of Freedom
-	[31850] = {cooldown = 120, duration = 8, talent = 31850, charges = 1, class = "PALADIN", type = 2}, --Ardent Defender
-	[6940] = {cooldown = 120, duration = 12, talent = false, charges = 1, class = "PALADIN", type = 3}, --Blessing of Sacrifice
+	[1044] = {cooldown = 25, duration = 8, talent = false, charges = 1, class = "PALADIN", type = 3}, --Hand of Freedom
+	[31850] = {cooldown = 120, duration = 8, talent = 31850, charges = 1, class = "PALADIN", type = 3}, --Ardent Defender
+	[6940] = {cooldown = 120, duration = 12, talent = false, charges = 1, class = "PALADIN", type = 3}, --Hand of Sacrifice
 
 	--> warrior
 	[1719] = {cooldown = 90, duration = 10, talent = false, charges = 1, class = "WARRIOR", type = 1}, --Recklessness
 	[46924] = {cooldown = 60, duration = 4, talent = 46924, charges = 1, class = "WARRIOR", type = 1}, --Bladestorm (talent)
-	[12975] = {cooldown = 180, duration = 15, talent = false, charges = 1, class = "WARRIOR", type = 2}, --Last Stand
-	[871] = {cooldown = 8, duration = 240, talent = false, charges = 1, class = "WARRIOR", type = 2}, --Shield Wall
+	[12975] = {cooldown = 180, duration = 20, talent = 12975, charges = 1, class = "WARRIOR", type = 3}, --Last Stand
+	[871] = {cooldown = 300, duration = 12, talent = false, charges = 1, class = "WARRIOR", type = 3}, --Shield Wall
 
 	--> warlock
 	[1122] = {cooldown = 180, duration = 30, talent = false, charges = 1, class = "WARLOCK", type = 1}, --Summon Infernal
+	[47884] = {cooldown = 900, duration = 900, talent = false, charges = 1, class = "WARLOCK", type = 3}, --Soul Stone
 	[47860] = {cooldown = 120, duration = 3, talent = false, charges = 1, class = "WARLOCK", type = 5}, --Death Coil
 	[47847] = {cooldown = 20, duration = 3, talent = false, charges = 1, class = "WARLOCK", type = 5}, --Shadowfury
 
 	--> shaman
 	[51533] = {cooldown = 120, duration = 15, talent = 51533, charges = 1, class = "SHAMAN", type = 1}, --Feral Spirit
+	[2825] = {cooldown = 300, duration = 40, talent = false, charges = 1, class = "SHAMAN", type = 4}, --Bloodlust
+	[32182] = {cooldown = 300, duration = 40, talent = false, charges = 1, class = "SHAMAN", type = 4}, --Heroism
 	[16190] = {cooldown = 300, duration = 12, talent = 16190, charges = 1, class = "SHAMAN", type = 4}, --Mana Tide Totem
 	[16166] = {cooldown = 120, duration = 15, talent = 16166, charges = 1, class = "SHAMAN", type = 4}, --Mana Tide Totem
 
@@ -293,11 +317,11 @@ DF.CooldownsInfo = {
 	[19574] = {cooldown = 90, duration = 12, talent = 19574, charges = 1, class = "HUNTER", type = 1}, --Bestial Wrath
 
 	--> druid
-	[22812] = {cooldown = 60, duration = 12, talent = false, charges = 1, class = "DRUID", type = 2}, --Barkskin
+	[22812] = {cooldown = 60, duration = 12, talent = false, charges = 1, class = "DRUID", type = 3}, --Barkskin
 	[29166] = {cooldown = 180, duration = 12, talent = false, charges = 1, class = "DRUID", type = 3}, --Innervate
 	[48477] = {cooldown = 600, duration = false, talent = false, charges = 1, class = "DRUID", type = 3}, --Rebirth
 	[50334] = {cooldown = 180, duration = 15, talent = false, charges = 1, class = "DRUID", type = 1}, --Berserk
-	[61336] = {cooldown = 120, duration = 6, talent = false, charges = 2, class = "DRUID", type = 2}, --Survival Instincts (2min feral 4min guardian, same spellid)
+	[61336] = {cooldown = 180, duration = 20, talent = false, charges = 2, class = "DRUID", type = 3}, --Survival Instincts(Feral Talent)
 	[77764] = {cooldown = 120, duration = 8, talent = false, charges = 1, class = "DRUID", type = 4}, --Stampeding Roar (utility)
 	[48447] = {cooldown = 180, duration = 8, talent = false, charges = 1, class = "DRUID", type = 4}, --Tranquility
 
@@ -307,15 +331,15 @@ DF.CooldownsInfo = {
 	[48743] = {cooldown = 120, duration = 15, talent = 48743, charges = 1, class = "DEATHKNIGHT", type = 2}, --Death Pact (talent)
 	[47568] = {cooldown = 120, duration = 20, talent = false, charges = 1, class = "DEATHKNIGHT", type = 1}, --Empower Rune Weapon
 	[49028] = {cooldown = 120, duration = 8, talent = false, charges = 1, class = "DEATHKNIGHT", type = 1}, --Dancing Rune Weapon
-	[55233] = {cooldown = 90, duration = 10, talent = false, charges = 1, class = "DEATHKNIGHT", type = 2}, --Vampiric Blood
-	[48792] = {cooldown = 120, duration = 8, talent = false, charges = 1, class = "DEATHKNIGHT", type = 2}, --Icebound Fortitude
+	[55233] = {cooldown = 60, duration = 10, talent = 55233, charges = 1, class = "DEATHKNIGHT", type = 3}, --Vampiric Blood(Blood Talent)
+	[48792] = {cooldown = 60, duration = 12, talent = false, charges = 1, class = "DEATHKNIGHT", type = 3}, --Icebound Fortitude
 
 	--> mage
 	[12042] = {cooldown = 90, duration = 10, talent = 12042, charges = 1, class = "MAGE", type = 1},  --Arcane Power
 	[12051] = {cooldown = 90, duration = 6, talent = false, charges = 1, class = "MAGE", type = 1},  --Evocation
 	[66] = {cooldown = 300, duration = 20, talent = false, charges = 1, class = "MAGE", type = 2},  --Invisibility
 	[12472] = {cooldown = 180, duration = 20, talent = 12472, charges = 1, class = "MAGE", type = 1},  --Icy Veins
-	[45438] = {cooldown = 240, duration = 10, talent = false, charges = 1, class = "MAGE", type = 2},  --Ice Block
+	[45438] = {cooldown = 300, duration = 10, talent = false, charges = 1, class = "MAGE", type = 3},  --Ice Block
 	[11958] = {cooldown = 300, duration = false, talent = 11958, charges = 1, class = "MAGE", type = 5},  --Cold Snap
 
 	--> priest
@@ -327,7 +351,7 @@ DF.CooldownsInfo = {
 	[64844] = {cooldown = 480, duration = 8, talent = false, charges = 1, class = "PRIEST", type = 4},  -- Divine Hymn
 	[64901] = {cooldown = 360, duration = 6, talent = false, charges = 1, class = "PRIEST", type = 4},  -- Hymn of Hope
 	[10890] = {cooldown = 60, duration = 8, talent = false, charges = 1, class = "PRIEST", type = 5},  -- Psychic Scream, Rank 4
-	[47585] = {cooldown = 120, duration = 6, talent = 47585, charges = 1, class = "PRIEST", type = 2},  -- Dispersion
+	[47585] = {cooldown = 120, duration = 6, talent = 47585, charges = 1, class = "PRIEST", type = 3},  -- Dispersion
 
 	--> rogue
 	[1856] = {cooldown = 120, duration = 3, talent = false, charges = 1, class = "ROGUE", type = 2},  --Vanish
