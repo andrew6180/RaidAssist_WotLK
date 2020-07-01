@@ -3269,18 +3269,16 @@ function DF:GetCurrentSpec()
 end
 
 local specs_per_class = {
-	["DEMONHUNTER"] = {577, 581},
 	["DEATHKNIGHT"] = {250, 251, 252},
 	["WARRIOR"] = {71, 72, 73},
 	["MAGE"] = {62, 63, 64},
 	["ROGUE"] = {259, 260, 261},
-	["DRUID"] = {102, 103, 104, 105},
+	["DRUID"] = {102, 103, 105},
 	["HUNTER"] = {253, 254, 255},
 	["SHAMAN"] = {262, 263, 254},
 	["PRIEST"] = {256, 257, 258},
 	["WARLOCK"] = {265, 266, 267},
 	["PALADIN"] = {65, 66, 70},
-	["MONK"] = {268, 269, 270},
 }
 
 function DF:GetClassSpecIDs (class)
@@ -3551,10 +3549,6 @@ function DF:GetCLEncounterIDs()
 end
 
 DF.ClassSpecs = {
-	["DEMONHUNTER"] = {
-		[577] = true,
-		[581] = true,
-	},
 	["DEATHKNIGHT"] = {
 		[250] = true,
 		[251] = true,
@@ -3606,18 +3600,9 @@ DF.ClassSpecs = {
 		[66] = true,
 		[70] = true,
 	},
-	["MONK"] = {
-		[268] = true,
-		[269] = true,
-		[270] = true,
-	},
 }
 
 DF.SpecListByClass = {
-	["DEMONHUNTER"] = {
-		577,
-		581,
-	},
 	["DEATHKNIGHT"] = {
 		250,
 		251,
@@ -3668,11 +3653,6 @@ DF.SpecListByClass = {
 		65,
 		66,
 		70,
-	},
-	["MONK"] = {
-		268,
-		269,
-		270,
 	},
 }
 
