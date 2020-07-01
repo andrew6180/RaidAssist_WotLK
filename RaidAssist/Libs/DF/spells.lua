@@ -169,6 +169,8 @@ DF.CooldownsBySpec = {
 			[10278] = 3, --Blessing of Protection
 			[48788] = 3, --Lay on Hands
 			[6940] = 3, -- Hand of Sacrifice
+		
+		        [31821] = 4, --Aura Mastery
 
 			[1044] = 5, --Blessing of Freedom
 			[853] = 5, --Hammer of Justice
