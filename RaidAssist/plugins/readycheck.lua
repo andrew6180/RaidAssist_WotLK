@@ -420,7 +420,7 @@ function ReadyCheck:READY_CHECK_FINISHED (event, arg2, arg3)
 
 	if ReadyCheck.From.player == UnitName("player") then 
 		ReadyCheck:SendPluginCommMessage(COMM_READY_CHECK_FINISHED, "RAID")
-	else
+	elseif not UnitIsGroupLeader("player") then
 		local all_ready = true
 		for _, status in pairs(ReadyCheck.AnswerTable) do 
 			if status ~= true then
