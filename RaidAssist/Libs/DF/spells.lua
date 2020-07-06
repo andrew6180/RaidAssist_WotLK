@@ -169,8 +169,6 @@ DF.CooldownsBySpec = {
 			[10278] = 3, --Blessing of Protection
 			[48788] = 3, --Lay on Hands
 			[6940] = 3, -- Hand of Sacrifice
-		
-		        [31821] = 4, --Aura Mastery
 
 			[1044] = 5, --Blessing of Freedom
 			[853] = 5, --Hammer of Justice
@@ -416,6 +414,7 @@ DF.SpecIds = {
 
 	[102] = "DRUID",
 	[103] = "DRUID",
+	[104] = "DRUID",
 	[105] = "DRUID",
 
 	[253] = "HUNTER",
@@ -617,7 +616,7 @@ DF.SpellRangeCheckListBySpec = {
 
 	[102] = 8921, -->  druid balance - Moonfire (45 yards)
 	[103] = 8921, -->  druid feral - Moonfire (40 yards)
-	[103] = 6795, -->  druid guardian - Growl
+	[104] = 6795, -->  druid guardian - Growl
 	[105] = 8921, -->  druid resto - Moonfire (40 yards)
 
 	[253] = 193455, -->  hunter bm - Cobra Shot
