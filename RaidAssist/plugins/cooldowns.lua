@@ -136,15 +136,13 @@ end
 
 --> build the spell list from the framework
 local spell_list = {}
-
-for specID, cooldowns in pairs (DetailsFramework.CooldownsBySpec) do
-	local class = DetailsFramework.SpecIds [specID]
-	
+for specID, cooldowns in pairs (DF.CooldownsBySpec) do
+	local class = DF.SpecIds [specID]
 	for spellID, cooldownType in pairs (cooldowns) do
 		if (cooldownType == 3 or cooldownType == 4) then
-			if DetailsFramework.CooldownsExternals [spellID] or DetailsFramework.CooldownsRaid [spellID] then 
+			if DF.CooldownsExternals [spellID] or DF.CooldownsRaid [spellID] then 
 				if GetSpellInfo (spellID) ~= nil then -- lets grab real spells in the game lol
-					local cooldownInfo = DetailsFramework.CooldownsInfo [spellID]
+					local cooldownInfo = DF.CooldownsInfo [spellID]
 					if (cooldownInfo) then
 						local classTable = spell_list [cooldownInfo.class] or {}
 						spell_list [cooldownInfo.class] = classTable
@@ -367,18 +365,7 @@ function Cooldowns.CheckUnitCooldowns (unitID, groupType, groupIndex)
 		return -- exit we're checking class too early
 	end
 	info.class_id = DF.ClassFileNameToIndex[info.class]
-	local _, t1, t2, t3 = LibGroupTalents:GetGUIDTalentSpec(guid)
-	if t1 and t2 and t3 then 
-		if t1 > t2 and t1 > t3 then
-			info.global_spec_id = DF:GetClassSpecIDs(info.class)[1]
-		elseif t2 > t1 and t2 > t3 then
-			info.global_spec_id = DF:GetClassSpecIDs(info.class)[2]
-		elseif t3 > t1 and t3 > t2 then 
-			info.global_spec_id = DF:GetClassSpecIDs(info.class)[3]
-		end
-	else
-		info.global_spec_id = DF:GetClassSpecIDs(info.class)[1]
-	end
+	info.global_spec_id = DF.GetSpecializationID(info.class, DF.GetSpecialization(unitID))
 	-- get talent from LibGroupTalents
 	info.has_talent = function(talent) 
 		local talentname = GetSpellInfo(talent)
@@ -395,6 +382,8 @@ function Cooldowns.CheckUnitCooldowns (unitID, groupType, groupIndex)
 		
 		local _, class = UnitClass (unitID)
 		local unit_spells = spell_list [info.class or class] and spell_list [info.class or class] [info.global_spec_id]
+		--print("dump spells for ", name, info.global_spec_id)
+		--DevTools_Dump(unit_spells)
 		local spells_added = {}
 		for spellid, spelltable in pairs (unit_spells or {}) do
 		
