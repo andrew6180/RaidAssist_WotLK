@@ -1060,8 +1060,6 @@ function Cooldowns:CooldownReady (param)
 			if (bar) then
 				bar.value = 100
 				Cooldowns.SetBarRightText (bar, spell.charges_amt)
-					bar:Show()
-				end
 			end
 		end
 	end
