@@ -43,19 +43,6 @@ local default_config = {
 }
 
 --> check for new cooldowns
-for spellId, _ in pairs (DetailsFramework.CooldownsExternals) do
-	if (default_config.cooldowns_enabled [spellId] == nil) then
-		default_config.cooldowns_enabled [spellId] = true
-		local name = GetSpellInfo (spellId)
-	end
-end
-
-for spellId, _ in pairs (DetailsFramework.CooldownsRaid) do
-	if (default_config.cooldowns_enabled [spellId] == nil) then
-		default_config.cooldowns_enabled [spellId] = true
-		local name = GetSpellInfo (spellId)
-	end
-end
 
 local icon_texcoord = {l=0, r=32/512, t=0, b=1}
 local text_color_enabled = {r=1, g=1, b=1, a=1}
@@ -81,6 +68,23 @@ Cooldowns.UnitLastCast = {}
 
 --> when the plugin finishes load and are ready to use
 Cooldowns.OnInstall = function (plugin)
+
+	for _, panel in ipairs(Cooldowns.db.cooldowns_panels) do 
+		panel.cooldowns_enabled = panel.cooldowns_enabled or {}
+		for spellId, _ in pairs (DetailsFramework.CooldownsExternals) do
+			if (panel.cooldowns_enabled [spellId] == nil) then
+				panel.cooldowns_enabled [spellId] = true
+				local name = GetSpellInfo (spellId)
+			end
+		end
+
+		for spellId, _ in pairs (DetailsFramework.CooldownsRaid) do
+			if (panel.cooldowns_enabled [spellId] == nil) then
+				panel.cooldowns_enabled [spellId] = true
+				local name = GetSpellInfo (spellId)
+			end
+		end
+	end
 
 	Cooldowns.db.menu_priority = default_priority
 
@@ -297,8 +301,7 @@ end
 
 local panel_prototype = {
 	enabled = false,
-	cooldowns_raid = true,
-	cooldowns_external = true,
+	cooldowns_enabled = {},
 	grow_inverse = false,
 }
 
@@ -521,8 +524,6 @@ function Cooldowns.CheckIfNoPanel()
 	if (#Cooldowns.db.cooldowns_panels == 0) then
 		--> create the first panel
 		local first_panel = Cooldowns.CreateNewPanel()
-		first_panel.cooldowns_raid = true
-		first_panel.cooldowns_external = true
 		first_panel.grow_inverse = false
 	end	
 end
@@ -541,6 +542,22 @@ function Cooldowns.CreateNewPanel()
 	end
 	
 	local new_panel = Cooldowns.table.copy ({}, panel_prototype)
+	new_panel.cooldowns_enabled = {}
+
+	for spellId, _ in pairs (DetailsFramework.CooldownsExternals) do
+		if (new_panel.cooldowns_enabled [spellId] == nil) then
+			new_panel.cooldowns_enabled [spellId] = true
+			local name = GetSpellInfo (spellId)
+		end
+	end
+
+	for spellId, _ in pairs (DetailsFramework.CooldownsRaid) do
+		if (new_panel.cooldowns_enabled [spellId] == nil) then
+			new_panel.cooldowns_enabled [spellId] = true
+			local name = GetSpellInfo (spellId)
+		end
+	end
+
 	tinsert (Cooldowns.db.cooldowns_panels, new_panel)
 	new_panel.name = "Panel" .. panel_number
 	new_panel.id = panel_number
@@ -956,18 +973,17 @@ function Cooldowns.BarControlCleanUpCache (panel)
 	wipe (panel.PlayerCache)
 end
 
-function Cooldowns.BarControlUpdatePanelSpells (panel, cooldown_raid, cooldown_external)
+function Cooldowns.BarControlUpdatePanelSpells (panel, cooldowns_enabled)
 	--> reset spells
 	for spellid, value in pairs (panel.Spells) do
 		panel.Spells [spellid] = nil
 	end
 	
 	--> build spells the panel can show
-	local cd_enabled = Cooldowns.db.cooldowns_enabled
 	for class, classtable in pairs (spell_list) do
 		for specid, spectable in pairs (classtable) do
 			for spellid, spelltable in pairs (spectable) do
-				if (cd_enabled [spellid] and ((cooldown_raid and spelltable.type == DF_COOLDOWN_RAID) or (cooldown_external and spelltable.type == DF_COOLDOWN_EXTERNAL))) then
+				if (cooldowns_enabled [spellid]) then
 					panel.Spells [spellid] = true
 				end
 			end
@@ -1114,11 +1130,10 @@ function Cooldowns.BarControl (update_type, unitid, spellid)
 	
 	elseif (update_type == "roster_update") then
 		for id, panel in pairs (Cooldowns.ScreenPanels) do
-			local cooldown_raid = Cooldowns.db.cooldowns_panels [id].cooldowns_raid
-			local cooldown_external = Cooldowns.db.cooldowns_panels [id].cooldowns_external
+			local cooldowns_enabled = Cooldowns.db.cooldowns_panels [id].cooldowns_enabled
 			
 			--> update allowed spells in this panel
-			Cooldowns.BarControlUpdatePanelSpells (panel, cooldown_raid, cooldown_external)
+			Cooldowns.BarControlUpdatePanelSpells (panel, cooldowns_enabled)
 			Cooldowns.BarControlCleanUpCache (panel)
 			
 			local bar_index = 1
@@ -1225,6 +1240,7 @@ function Cooldowns.BuildOptions (frame)
 	
 	local update_panels_config = function()
 		CooldownsOptionsHolder1:RefreshOptions()
+		main_frame:RefreshOptions()
 		Cooldowns.CheckForShowPanels ("PANEL_OPTIONS_UPDATE")
 	end
 	
@@ -1291,18 +1307,6 @@ function Cooldowns.BuildOptions (frame)
 				end
 			end,
 			name = L["S_ENABLED"],
-		},
-		{
-			type = "toggle",
-			get = function() return current_editing_panel.cooldowns_raid end,
-			set = function (self, fixedparam, value) current_editing_panel.cooldowns_raid = value; Cooldowns.CheckForShowPanels ("TOGGLE_OPTIONS"); update_panels_config() end,
-			name = L["S_PLUGIN_COOLDOWNS_RAID_CDS"],
-		},
-		{
-			type = "toggle",
-			get = function() return current_editing_panel.cooldowns_external end,
-			set = function (self, fixedparam, value) current_editing_panel.cooldowns_external = value; Cooldowns.CheckForShowPanels ("TOGGLE_OPTIONS"); update_panels_config() end,
-			name = L["S_PLUGIN_COOLDOWNS_EXTERNAL_CDS"],
 		},
 		{
 			type = "toggle",
@@ -1600,8 +1604,8 @@ function Cooldowns.BuildOptions (frame)
 			background:SetScript ("OnLeave", on_leave)
 			background.spellid = spellid
 		
-			local func = function (self, fixedparam, value) Cooldowns.db.cooldowns_enabled [spellid] = value; Cooldowns.BarControl ("roster_update") end
-			local checkbox, label = Cooldowns:CreateSwitch (main_frame, func, Cooldowns.db.cooldowns_enabled [spellid], 64, 64, _, _, _, "CooldownsDropdown" .. spellid .. "RaidWide", _, nil, nil, "|T" .. spellicon .. ":14:14:0:0:64:64:5:59:5:59|t " .. spellname, Cooldowns:GetTemplate ("switch", "OPTIONS_CHECKBOX_TEMPLATE"), Cooldowns:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
+			local func = function (self, fixedparam, value) current_editing_panel.cooldowns_enabled [spellid] = value; Cooldowns.BarControl ("roster_update") end
+			local checkbox, label = Cooldowns:CreateSwitch (main_frame, func, current_editing_panel.cooldowns_enabled [spellid], 64, 64, _, _, _, "CooldownsDropdown" .. spellid .. "RaidWide", _, nil, nil, "|T" .. spellicon .. ":14:14:0:0:64:64:5:59:5:59|t " .. spellname, Cooldowns:GetTemplate ("switch", "OPTIONS_CHECKBOX_TEMPLATE"), Cooldowns:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
 			checkbox:SetAsCheckBox()
 			checkbox.tooltip = format (L["S_PLUGIN_COOLDOWNS_SPELLNAME"], spellname)
 			checkbox:ClearAllPoints(); label:ClearAllPoints()
@@ -1645,8 +1649,8 @@ function Cooldowns.BuildOptions (frame)
 			background:SetScript ("OnLeave", on_leave)
 			background.spellid = spellid
 		
-			local func = function (self, fixedparam, value) Cooldowns.db.cooldowns_enabled [spellid] = value; Cooldowns.BarControl ("roster_update") end
-			local checkbox, label = Cooldowns:CreateSwitch (main_frame, func, Cooldowns.db.cooldowns_enabled [spellid], 64, 64, _, _, _, "CooldownsDropdown" .. spellid .. "External", _, nil, nil, "|T" .. spellicon .. ":14:14:0:0:64:64:5:59:5:59|t " .. spellname, Cooldowns:GetTemplate ("switch", "OPTIONS_CHECKBOX_TEMPLATE"), Cooldowns:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
+			local func = function (self, fixedparam, value) current_editing_panel.cooldowns_enabled [spellid] = value; Cooldowns.BarControl ("roster_update") end
+			local checkbox, label = Cooldowns:CreateSwitch (main_frame, func, current_editing_panel.cooldowns_enabled [spellid], 64, 64, _, _, _, "CooldownsDropdown" .. spellid .. "External", _, nil, nil, "|T" .. spellicon .. ":14:14:0:0:64:64:5:59:5:59|t " .. spellname, Cooldowns:GetTemplate ("switch", "OPTIONS_CHECKBOX_TEMPLATE"), Cooldowns:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
 			checkbox:SetAsCheckBox()
 			checkbox.tooltip = format (L["S_PLUGIN_COOLDOWNS_SPELLNAME"], spellname)
 			checkbox:ClearAllPoints(); label:ClearAllPoints()
