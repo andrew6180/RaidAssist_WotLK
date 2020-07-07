@@ -71,6 +71,21 @@ Cooldowns.OnInstall = function (plugin)
 
 	for _, panel in ipairs(Cooldowns.db.cooldowns_panels) do 
 		panel.cooldowns_enabled = panel.cooldowns_enabled or {}
+
+		for spellId, _ in pairs (DetailsFramework.CooldownsAttack) do
+			if (panel.cooldowns_enabled [spellId] == nil) then
+				panel.cooldowns_enabled [spellId] = false
+				local name = GetSpellInfo (spellId)
+			end
+		end
+
+		for spellId, _ in pairs (DetailsFramework.CooldownsDeffense) do
+			if (panel.cooldowns_enabled [spellId] == nil) then
+				panel.cooldowns_enabled [spellId] = false
+				local name = GetSpellInfo (spellId)
+			end
+		end
+
 		for spellId, _ in pairs (DetailsFramework.CooldownsExternals) do
 			if (panel.cooldowns_enabled [spellId] == nil) then
 				panel.cooldowns_enabled [spellId] = true
@@ -81,6 +96,13 @@ Cooldowns.OnInstall = function (plugin)
 		for spellId, _ in pairs (DetailsFramework.CooldownsRaid) do
 			if (panel.cooldowns_enabled [spellId] == nil) then
 				panel.cooldowns_enabled [spellId] = true
+				local name = GetSpellInfo (spellId)
+			end
+		end
+
+		for spellId, _ in pairs (DetailsFramework.CooldownsUtility) do
+			if (panel.cooldowns_enabled [spellId] == nil) then
+				panel.cooldowns_enabled [spellId] = false
 				local name = GetSpellInfo (spellId)
 			end
 		end
@@ -125,7 +147,7 @@ local get_unit_name = function (unitid)
 end
 
 function Cooldowns:COMBAT_LOG_EVENT_UNFILTERED(self, time, event, who_guid, who_name, who_flags, target_guid, targeT_name, target_flags, spellid, ...)
-	if event == "SPELL_CAST_FAILED" then -- not sure if this is everything to be filtered out but we'll see.
+	if event == "SPELL_CAST_FAILED" or event == "SPELL_AURA_REMOVED" then -- not sure if this is everything to be filtered out but we'll see.
 		return 
 	end
 	if who_name and who_name ~= "" and who_guid and spellid then
@@ -143,26 +165,22 @@ local spell_list = {}
 for specID, cooldowns in pairs (DF.CooldownsBySpec) do
 	local class = DF.SpecIds [specID]
 	for spellID, cooldownType in pairs (cooldowns) do
-		if (cooldownType == 3 or cooldownType == 4) then
-			if DF.CooldownsExternals [spellID] or DF.CooldownsRaid [spellID] then 
-				if GetSpellInfo (spellID) ~= nil then -- lets grab real spells in the game lol
-					local cooldownInfo = DF.CooldownsInfo [spellID]
-					if (cooldownInfo) then
-						local classTable = spell_list [cooldownInfo.class] or {}
-						spell_list [cooldownInfo.class] = classTable
-						
-						local specTable = classTable [specID] or {}
-						classTable [specID] = specTable
-					
-						specTable [spellID] = {
-							cooldown = cooldownInfo.cooldown,
-							need_talent = cooldownInfo.talent,
-							type = cooldownType,
-							duration = cooldownInfo.duration,
-							charges = cooldownInfo.charges,
-						}
-					end
-				end
+		if GetSpellInfo (spellID) ~= nil then -- lets grab real spells in the game lol
+			local cooldownInfo = DF.CooldownsInfo [spellID]
+			if (cooldownInfo) then
+				local classTable = spell_list [cooldownInfo.class] or {}
+				spell_list [cooldownInfo.class] = classTable
+				
+				local specTable = classTable [specID] or {}
+				classTable [specID] = specTable
+			
+				specTable [spellID] = {
+					cooldown = cooldownInfo.cooldown,
+					need_talent = cooldownInfo.talent,
+					type = cooldownType,
+					duration = cooldownInfo.duration,
+					charges = cooldownInfo.charges,
+				}
 			end
 		end
 	end
@@ -1042,7 +1060,8 @@ function Cooldowns:CooldownReady (param)
 			if (bar) then
 				bar.value = 100
 				Cooldowns.SetBarRightText (bar, spell.charges_amt)
-				bar:Show()
+					bar:Show()
+				end
 			end
 		end
 	end
@@ -1528,9 +1547,31 @@ function Cooldowns.BuildOptions (frame)
 	
 ---------- Cooldowns -----------
 -- ~cooldowns ~list
-	
-	local cooldowns_raid = {}
+DF_COOLDOWN_OFFENSIVE = 1
+DF_COOLDOWN_PERSONAL = 2
+DF_COOLDOWN_EXTERNAL = 3
+DF_COOLDOWN_RAID = 4
+DF_COOLDOWN_UTILITY = 5
+
+	local cooldowns_offensive = {}
+	local cooldowns_personal = {}
 	local cooldowns_external = {}
+	local cooldowns_raid = {}
+	local cooldowns_utility = {}
+
+	for spellId, _ in pairs (DetailsFramework.CooldownsAttack) do
+		local spellName = GetSpellInfo (spellId)
+		if (spellName) then
+			tinsert (cooldowns_offensive, {spellId, spellName})
+		end
+	end
+
+	for spellId, _ in pairs (DetailsFramework.CooldownsDeffense) do
+		local spellName = GetSpellInfo (spellId)
+		if (spellName) then
+			tinsert (cooldowns_personal, {spellId, spellName})
+		end
+	end
 	
 	for spellId, _ in pairs (DetailsFramework.CooldownsExternals) do
 		local spellName = GetSpellInfo (spellId)
@@ -1545,13 +1586,22 @@ function Cooldowns.BuildOptions (frame)
 			tinsert (cooldowns_raid, {spellId, spellName})
 		end
 	end
-	
+
+	for spellId, _ in pairs (DetailsFramework.CooldownsUtility) do
+		local spellName = GetSpellInfo (spellId)
+		if (spellName) then
+			tinsert (cooldowns_utility, {spellId, spellName})
+		end
+	end
+	table.sort (cooldowns_offensive, DetailsFramework.SortOrder2R)
+	table.sort (cooldowns_personal, DetailsFramework.SortOrder2R)
 	table.sort (cooldowns_external, DetailsFramework.SortOrder2R)
 	table.sort (cooldowns_raid, DetailsFramework.SortOrder2R)
-	
-	--raid wide
-	local index = 1
+	table.sort (cooldowns_utility, DetailsFramework.SortOrder2R)
+
 	local x = 420
+	local index = 1
+
 	local build_menu_raid = {}
 	local backdrop_table = {bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tileSize = 64, tile = true}
 	local frame_level = main_frame:GetFrameLevel()
@@ -1559,7 +1609,7 @@ function Cooldowns.BuildOptions (frame)
 	local on_enter = function (self) 
 		self:SetBackdropColor (.3, .3, .3, 0.5) 
 		GameTooltip:SetOwner (self, "ANCHOR_RIGHT")
-		GameTooltip:SetSpellByID (self.spellid)
+		GameTooltip:SetHyperlink("spell:"..self.spellid)
 		GameTooltip:Show()
 	end
 	
@@ -1573,11 +1623,158 @@ function Cooldowns.BuildOptions (frame)
 		GameTooltip:Hide()
 	end
 	
-	local label_raid_cooldowns = Cooldowns:CreateLabel (main_frame, L["S_PLUGIN_COOLDOWNS_RAID_CDS"], Cooldowns:GetTemplate ("font", "ORANGE_FONT_TEMPLATE"))
+	local label_personal_cooldowns = Cooldowns:CreateLabel (main_frame, "Personal Cooldowns:", Cooldowns:GetTemplate ("font", "ORANGE_FONT_TEMPLATE"))
 	local label_external_cooldowns = Cooldowns:CreateLabel (main_frame, L["S_PLUGIN_COOLDOWNS_EXTERNAL_CDS"], Cooldowns:GetTemplate ("font", "ORANGE_FONT_TEMPLATE"))
+	local label_raid_cooldowns = Cooldowns:CreateLabel (main_frame, L["S_PLUGIN_COOLDOWNS_RAID_CDS"], Cooldowns:GetTemplate ("font", "ORANGE_FONT_TEMPLATE"))
 	
-	label_raid_cooldowns:SetPoint ("topleft", main_frame, "topleft", 10+x, -0)
+	label_personal_cooldowns:SetPoint ("topleft", main_frame, "topleft", 10+x, -0)
 	label_external_cooldowns:SetPoint ("topleft", main_frame, "topleft", 10+x+180, -0)
+	label_raid_cooldowns:SetPoint ("topleft", main_frame, "topleft", 10+x+180+180, -0)
+
+	--personal cooldowns
+	
+	for _, spellTable in ipairs (cooldowns_personal) do
+	
+		local spellid = spellTable [1]
+	
+		local spellname, _, spellicon = GetSpellInfo (spellid)
+		if (spellname) then
+			local background = CreateFrame ("frame", nil, main_frame)
+			background:EnableMouse(true)
+			background:SetBackdrop (backdrop_table)
+			background:SetFrameLevel (frame_level+1)
+			
+			background:SetBackdropColor (.1, .1, .1, 0.4)
+			
+			local class = DetailsFramework:FindClassForCooldown (spellid)
+			if (class) then
+				local classColor = RAID_CLASS_COLORS [class]
+				if (classColor) then
+					background:SetBackdropColor (classColor.r, classColor.g, classColor.b, 0.4)
+					background.BackgroundColor = {classColor.r, classColor.g, classColor.b}
+				end
+			end
+			
+			background:SetSize (166, 18)
+			background:SetScript ("OnEnter", on_enter)
+			background:SetScript ("OnLeave", on_leave)
+			background.spellid = spellid
+		
+			local func = function (self, fixedparam, value) current_editing_panel.cooldowns_enabled [spellid] = value; Cooldowns.BarControl ("roster_update") end
+			local checkbox, label = Cooldowns:CreateSwitch (main_frame, func, current_editing_panel.cooldowns_enabled [spellid], 64, 64, _, _, _, "CooldownsDropdown" .. spellid .. "External", _, nil, nil, "|T" .. spellicon .. ":14:14:0:0:64:64:5:59:5:59|t " .. spellname, Cooldowns:GetTemplate ("switch", "OPTIONS_CHECKBOX_TEMPLATE"), Cooldowns:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
+			checkbox:SetAsCheckBox()
+			checkbox.tooltip = format (L["S_PLUGIN_COOLDOWNS_SPELLNAME"], spellname)
+			checkbox:ClearAllPoints(); label:ClearAllPoints()
+			checkbox:SetFrameLevel (frame_level+2)
+			
+			background:SetPoint ("topleft", main_frame, "topleft", 5+x, -20 + ((index-1) * -20))
+			label:SetPoint ("topleft", main_frame, "topleft", 10+x, -23 + ((index-1) * -20))
+			checkbox:SetPoint ("topleft", main_frame, "topleft", 150+x, -20 + ((index-1) * -20))
+
+			index = index + 1
+		end
+	end
+
+	--external cooldowns
+	x = x + 180
+	index = 1
+	
+	for _, spellTable in ipairs (cooldowns_external) do
+	
+		local spellid = spellTable [1]
+	
+		local spellname, _, spellicon = GetSpellInfo (spellid)
+		if (spellname) then
+			local background = CreateFrame ("frame", nil, main_frame)
+			background:EnableMouse(true)
+			background:SetBackdrop (backdrop_table)
+			background:SetFrameLevel (frame_level+1)
+			
+			background:SetBackdropColor (.1, .1, .1, 0.4)
+			
+			local class = DetailsFramework:FindClassForCooldown (spellid)
+			if (class) then
+				local classColor = RAID_CLASS_COLORS [class]
+				if (classColor) then
+					background:SetBackdropColor (classColor.r, classColor.g, classColor.b, 0.4)
+					background.BackgroundColor = {classColor.r, classColor.g, classColor.b}
+				end
+			end
+			
+			background:SetSize (166, 18)
+			background:SetScript ("OnEnter", on_enter)
+			background:SetScript ("OnLeave", on_leave)
+			background.spellid = spellid
+		
+			local func = function (self, fixedparam, value) current_editing_panel.cooldowns_enabled [spellid] = value; Cooldowns.BarControl ("roster_update") end
+			local checkbox, label = Cooldowns:CreateSwitch (main_frame, func, current_editing_panel.cooldowns_enabled [spellid], 64, 64, _, _, _, "CooldownsDropdown" .. spellid .. "External", _, nil, nil, "|T" .. spellicon .. ":14:14:0:0:64:64:5:59:5:59|t " .. spellname, Cooldowns:GetTemplate ("switch", "OPTIONS_CHECKBOX_TEMPLATE"), Cooldowns:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
+			checkbox:SetAsCheckBox()
+			checkbox.tooltip = format (L["S_PLUGIN_COOLDOWNS_SPELLNAME"], spellname)
+			checkbox:ClearAllPoints(); label:ClearAllPoints()
+			checkbox:SetFrameLevel (frame_level+2)
+			
+			background:SetPoint ("topleft", main_frame, "topleft", 5+x, -20 + ((index-1) * -20))
+			label:SetPoint ("topleft", main_frame, "topleft", 10+x, -23 + ((index-1) * -20))
+			checkbox:SetPoint ("topleft", main_frame, "topleft", 150+x, -20 + ((index-1) * -20))
+
+			index = index + 1
+		end
+	end
+
+	-- offensive cooldowns
+	local y = index * -20
+	y = y - 25
+	index = 1
+	
+	local label_offensive_cooldowns = Cooldowns:CreateLabel (main_frame, "Offensive Cooldowns:", Cooldowns:GetTemplate ("font", "ORANGE_FONT_TEMPLATE"))
+	
+	label_offensive_cooldowns:SetPoint ("topleft", main_frame, "topleft", 10+x, y)
+	
+	y = y - 20
+	for _, spellTable in ipairs (cooldowns_offensive) do
+	
+		local spellid = spellTable [1]
+		local spellname, _, spellicon = GetSpellInfo (spellid)
+		
+		if (spellname) then
+			local background = CreateFrame ("frame", nil, main_frame)
+			background:EnableMouse(true)
+			background:SetBackdrop (backdrop_table)
+			background:SetFrameLevel (frame_level+1)
+			background:SetBackdropColor (.1, .1, .1, 0.4)
+			
+			local class = DetailsFramework:FindClassForCooldown (spellid)
+			if (class) then
+				local classColor = RAID_CLASS_COLORS [class]
+				if (classColor) then
+					background:SetBackdropColor (classColor.r, classColor.g, classColor.b, 0.4)
+					background.BackgroundColor = {classColor.r, classColor.g, classColor.b}
+				end
+			end
+
+			background:SetSize (166, 18)
+			background:SetScript ("OnEnter", on_enter)
+			background:SetScript ("OnLeave", on_leave)
+			background.spellid = spellid
+		
+			local func = function (self, fixedparam, value) current_editing_panel.cooldowns_enabled [spellid] = value; Cooldowns.BarControl ("roster_update") end
+			local checkbox, label = Cooldowns:CreateSwitch (main_frame, func, current_editing_panel.cooldowns_enabled [spellid], 64, 64, _, _, _, "CooldownsDropdown" .. spellid .. "RaidWide", _, nil, nil, "|T" .. spellicon .. ":14:14:0:0:64:64:5:59:5:59|t " .. spellname, Cooldowns:GetTemplate ("switch", "OPTIONS_CHECKBOX_TEMPLATE"), Cooldowns:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
+			checkbox:SetAsCheckBox()
+			checkbox.tooltip = format (L["S_PLUGIN_COOLDOWNS_SPELLNAME"], spellname)
+			checkbox:ClearAllPoints(); label:ClearAllPoints()
+			checkbox:SetFrameLevel (frame_level+2)
+			
+			background:SetPoint ("topleft", main_frame, "topleft", 5+x, y + ((index-1) * -20))
+			label:SetPoint ("topleft", main_frame, "topleft", 10+x, y + ((index-1) * -20))
+			checkbox:SetPoint ("topleft", main_frame, "topleft", 150+x, y + ((index-1) * -20))
+
+			index = index + 1
+		end
+	end
+	
+	--raid wide
+	index = 1
+	x = x + 180
 	
 	for _, spellTable in ipairs (cooldowns_raid) do
 	
@@ -1586,6 +1783,7 @@ function Cooldowns.BuildOptions (frame)
 		
 		if (spellname) then
 			local background = CreateFrame ("frame", nil, main_frame)
+			background:EnableMouse(true)
 			background:SetBackdrop (backdrop_table)
 			background:SetFrameLevel (frame_level+1)
 			background:SetBackdropColor (.1, .1, .1, 0.4)
@@ -1619,20 +1817,26 @@ function Cooldowns.BuildOptions (frame)
 		end
 	end
 	
-	--external cooldowns
-	local x = 600
+	-- Utility Cooldowns
+	y = index * -20
+	y = y - 25
 	index = 1
+
+	local label_utility_cooldowns = Cooldowns:CreateLabel (main_frame, "Utility Cooldowns", Cooldowns:GetTemplate ("font", "ORANGE_FONT_TEMPLATE"))
 	
-	for _, spellTable in ipairs (cooldowns_external) do
+	label_utility_cooldowns:SetPoint ("topleft", main_frame, "topleft", 10+x, y)
+
+	y = y - 20
+	for _, spellTable in ipairs (cooldowns_utility) do
 	
 		local spellid = spellTable [1]
-	
 		local spellname, _, spellicon = GetSpellInfo (spellid)
+		
 		if (spellname) then
 			local background = CreateFrame ("frame", nil, main_frame)
+			background:EnableMouse(true)
 			background:SetBackdrop (backdrop_table)
 			background:SetFrameLevel (frame_level+1)
-			
 			background:SetBackdropColor (.1, .1, .1, 0.4)
 			
 			local class = DetailsFramework:FindClassForCooldown (spellid)
@@ -1643,22 +1847,22 @@ function Cooldowns.BuildOptions (frame)
 					background.BackgroundColor = {classColor.r, classColor.g, classColor.b}
 				end
 			end
-			
+
 			background:SetSize (166, 18)
 			background:SetScript ("OnEnter", on_enter)
 			background:SetScript ("OnLeave", on_leave)
 			background.spellid = spellid
 		
 			local func = function (self, fixedparam, value) current_editing_panel.cooldowns_enabled [spellid] = value; Cooldowns.BarControl ("roster_update") end
-			local checkbox, label = Cooldowns:CreateSwitch (main_frame, func, current_editing_panel.cooldowns_enabled [spellid], 64, 64, _, _, _, "CooldownsDropdown" .. spellid .. "External", _, nil, nil, "|T" .. spellicon .. ":14:14:0:0:64:64:5:59:5:59|t " .. spellname, Cooldowns:GetTemplate ("switch", "OPTIONS_CHECKBOX_TEMPLATE"), Cooldowns:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
+			local checkbox, label = Cooldowns:CreateSwitch (main_frame, func, current_editing_panel.cooldowns_enabled [spellid], 64, 64, _, _, _, "CooldownsDropdown" .. spellid .. "RaidWide", _, nil, nil, "|T" .. spellicon .. ":14:14:0:0:64:64:5:59:5:59|t " .. spellname, Cooldowns:GetTemplate ("switch", "OPTIONS_CHECKBOX_TEMPLATE"), Cooldowns:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
 			checkbox:SetAsCheckBox()
 			checkbox.tooltip = format (L["S_PLUGIN_COOLDOWNS_SPELLNAME"], spellname)
 			checkbox:ClearAllPoints(); label:ClearAllPoints()
 			checkbox:SetFrameLevel (frame_level+2)
 			
-			background:SetPoint ("topleft", main_frame, "topleft", 5+x, -20 + ((index-1) * -20))
-			label:SetPoint ("topleft", main_frame, "topleft", 10+x, -23 + ((index-1) * -20))
-			checkbox:SetPoint ("topleft", main_frame, "topleft", 150+x, -20 + ((index-1) * -20))
+			background:SetPoint ("topleft", main_frame, "topleft", 5+x, y + ((index-1) * -20))
+			label:SetPoint ("topleft", main_frame, "topleft", 10+x, y + ((index-1) * -20))
+			checkbox:SetPoint ("topleft", main_frame, "topleft", 150+x, y + ((index-1) * -20))
 
 			index = index + 1
 		end
