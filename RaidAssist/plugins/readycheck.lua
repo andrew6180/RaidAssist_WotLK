@@ -417,7 +417,9 @@ local finished_func = function()
 end
 
 function ReadyCheck:READY_CHECK_FINISHED (event, arg2, arg3)
-
+	if (ReadyCheck.AnswerTable) == nil then 
+		return
+	end
 	if ReadyCheck.From.player == UnitName("player") then 
 		ReadyCheck:SendPluginCommMessage(COMM_READY_CHECK_FINISHED, "RAID")
 	elseif not UnitIsGroupLeader("player") then
