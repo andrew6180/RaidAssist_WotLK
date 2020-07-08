@@ -422,6 +422,21 @@ function ReadyCheck:READY_CHECK_FINISHED (event, arg2, arg3)
 	end
 	if ReadyCheck.From.player == UnitName("player") then 
 		ReadyCheck:SendPluginCommMessage(COMM_READY_CHECK_FINISHED, "RAID")
+		local output = "[RAA] Not Ready: " 
+		local anyone_not_ready
+		for player, status in pairs(ReadyCheck.AnswerTable) do 
+			if status ~= true then
+				anyone_not_ready = true
+				output = output .. player .. " "
+			end
+		end
+
+		if anyone_not_ready and IsInRaid() then 
+			SendChatMessage(output, "RAID")
+		elseif anyone_not_ready then 
+			SendChatMessage(output, "PARTY")
+		end
+
 	elseif not UnitIsGroupLeader("player") then
 		local all_ready = true
 		for _, status in pairs(ReadyCheck.AnswerTable) do 
