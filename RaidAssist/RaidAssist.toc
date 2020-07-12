@@ -35,5 +35,6 @@ plugins\aurabank.lua
 plugins\roll.lua
 plugins\bislist.lua
 plugins\raidbislist.lua
+plugins\crossgamble.lua
 
 indent.lua

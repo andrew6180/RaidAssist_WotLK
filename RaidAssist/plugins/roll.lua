@@ -5,7 +5,7 @@ local ROLL_PATTERN = RANDOM_ROLL_RESULT
 
 local IsRaidOfficer = IsRaidOfficer
 local IsInRaid = IsInRaid
-local IsInParty = IsInParty
+local IsInGroup = IsInGroup
 local tsort = table.sort
 
 
@@ -33,6 +33,7 @@ local icon_texcoord = {l=0, r=1, t=0, b=1}
 local text_color_enabled = {r=1, g=1, b=1, a=1}
 local text_color_disabled = {r=0.5, g=0.5, b=0.5, a=1}
 local icon_texture = [[Interface\Buttons\UI-GroupLoot-Dice-Up]]
+local allow_raid_roll = false
 
 Roll.debug = false
 
@@ -81,7 +82,13 @@ Roll.OnEnable = function (plugin)
 	Roll:RegisterEvent("CHAT_MSG_RAID_WARNING", Roll.CHAT_MSG)
 	Roll:RegisterEvent("CHAT_MSG_RAID_LEADER", Roll.CHAT_MSG)
 	Roll:RegisterEvent("CHAT_MSG_PARTY_LEADER", Roll.CHAT_MSG)
-	Roll:RegisterEvent("CHAT_MSG_SYSTEM", Roll.CHAT_MSG_ROLL)
+    Roll:RegisterEvent("CHAT_MSG_SYSTEM", Roll.CHAT_MSG_ROLL)
+    
+    SLASH_RaidRoll1 = "/raidroll"
+    SLASH_RaidRoll2 = "/rr"
+    function SlashCmdList.RaidRoll (msg, editbox)
+	    Roll.StartRaidRoll()
+    end
 end
 
 Roll.OnDisable = function (plugin)
@@ -228,6 +235,11 @@ function Roll.BuildOptions (frame)
 	
 end
 
+function Roll:StartRaidRoll()
+    allow_raid_roll = true
+    RandomRoll(1, GetNumGroupMembers())
+end
+
 function Roll:DoRaidRoll(roll, high)
 	local players = {}
 	local msg = ""
@@ -269,11 +281,10 @@ function Roll:CHAT_MSG_ROLL(text, ...)
     end
 
     if not Roll.activeRoll.acceptingRolls then
-        if name == UnitName("player") then
-            if high <= 40 then 
-                Roll:DoRaidRoll(roll, high)
-                return
-            end
+        if name == UnitName("player") and allow_raid_roll then
+            allow_raid_roll = false
+            Roll:DoRaidRoll(roll, high)
+            return
         end
     end
     
@@ -360,7 +371,7 @@ function Roll:Say(msg, loud)
                 channel = "RAID"
             end
 
-        elseif IsInParty() then 
+        elseif IsInGroup() then 
             channel = "PARTY"
         end
 
