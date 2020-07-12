@@ -1,6 +1,8 @@
 local DF = DetailsFramework
 local LBB = LibStub("LibBabble-Boss-3.0"):GetLookupTable()
 local LibGroupTalents = LibStub("LibGroupTalents-1.0")
+local LibDeflate = LibStub("LibDeflate")
+local deflate_level = {level = 9}
 local RA = RaidAssist
 local _
 
@@ -153,7 +155,11 @@ end
 --]=]
 
 function RA:SendPluginCommWhisperMessage (prefix, target, callback, callbackParam, ...)
-	RA:SendCommMessage (RA.commPrefix, RA:Serialize (prefix, self.version or "", ...), "WHISPER", target, nil, callback, callbackParam)
+	local serialized = RA:Serialize (prefix, self.version or "", ...)
+	local compressed = LibDeflate:CompressDeflate(serialized, deflate_level)
+	local toSend = LibDeflate:EncodeForPrint(compressed)
+	
+	RA:SendCommMessage (RA.commPrefix, toSend, "WHISPER", target, nil, callback, callbackParam)
 end
 
 function RA:SendPluginCommMessage (prefix, channel, callback, callbackParam, ...)
@@ -161,24 +167,28 @@ function RA:SendPluginCommMessage (prefix, channel, callback, callbackParam, ...
 	if (callback) then
 		assert (type (callback) == "function", "SendPluginCommMessage expects a function as callback (optional).")
 	end
+
+	local serialized = RA:Serialize (prefix, self.version or "", ...)
+	local compressed = LibDeflate:CompressDeflate(serialized, deflate_level)
+	local toSend = LibDeflate:EncodeForPrint(compressed)
 	if (channel == "RAID-NOINSTANCE") then
 		if (IsInRaid ()) then
-			RA:SendCommMessage (RA.commPrefix, RA:Serialize (prefix, self.version or "", ...), "RAID", nil, nil, callback, callbackParam)
+			RA:SendCommMessage (RA.commPrefix, toSend, "RAID", nil, nil, callback, callbackParam)
 		end
 	elseif (channel == "RAID") then
 		if (IsInRaid ()) then
-			RA:SendCommMessage (RA.commPrefix, RA:Serialize (prefix, self.version or "", ...), "RAID", nil, nil, callback, callbackParam)
+			RA:SendCommMessage (RA.commPrefix, toSend, "RAID", nil, nil, callback, callbackParam)
 		end
 	elseif (channel == "PARTY-NOINSTANCE") then
 		if (IsInGroup ()) then
-			RA:SendCommMessage (RA.commPrefix, RA:Serialize (prefix, self.version or "", ...), "PARTY", nil, nil, callback, callbackParam)
+			RA:SendCommMessage (RA.commPrefix, toSend, "PARTY", nil, nil, callback, callbackParam)
 		end
 	elseif (channel == "PARTY") then
 		if (IsInGroup ()) then
-			RA:SendCommMessage (RA.commPrefix, RA:Serialize (prefix, self.version or "", ...), "PARTY", nil, nil, callback, callbackParam)
+			RA:SendCommMessage (RA.commPrefix, toSend, "PARTY", nil, nil, callback, callbackParam)
 		end
 	else
-		RA:SendCommMessage (RA.commPrefix, RA:Serialize (prefix, self.version or "", ...), channel, nil, nil, callback, callbackParam)
+		RA:SendCommMessage (RA.commPrefix, toSend, channel, nil, nil, callback, callbackParam)
 	end
 end
 

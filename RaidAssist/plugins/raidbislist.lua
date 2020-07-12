@@ -6,7 +6,7 @@ local default_priority = 14
 
 --battle res default config
 local default_config = {
-	enabled = true,
+	enabled = false,
 	menu_priority = 1,
 	saved_lists = {},
 	latest_raid_map = 536, -- nax for now
@@ -35,7 +35,7 @@ BisListRaid.IsDisabled = false
 
 local BisList = _G ["RaidAssistBisList"]
 
-local can_install = true
+local can_install = false
 
 BisListRaid.last_data_request = 0
 BisListRaid.last_data_sent = 0

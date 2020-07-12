@@ -181,7 +181,9 @@ end
 function LeaderToolbar.CreateScreenPanel()
 
 	local ScreenPanel = LeaderToolbar:CreateCleanFrame (LeaderToolbar, "LeaderToolbarScreenFrame")
-	ScreenPanel:SetSize (396, 26)
+	ScreenPanel.Lock:Show()
+	ScreenPanel.Lock:SetPoint("right", ScreenPanel, "right", -5, 0)
+	ScreenPanel:SetSize (420, 26)
 	LeaderToolbar.ScreenPanel = ScreenPanel
 	
 	DetailsFramework:ApplyStandardBackdrop (ScreenPanel)

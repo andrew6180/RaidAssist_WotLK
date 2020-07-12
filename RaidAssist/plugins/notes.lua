@@ -93,6 +93,7 @@ Notepad.OnInstall = function (plugin)
 	screen_frame:SetSize (250, 20)
 	screen_frame:SetClampedToScreen (true)
 	screen_frame:Hide()
+	screen_frame:EnableMouse(true)
 	
 	-------
 	
@@ -112,6 +113,7 @@ Notepad.OnInstall = function (plugin)
 	editbox_notes:SetResizable (true)
 	editbox_notes:SetMaxResize (600, 1024)
 	editbox_notes:SetMinResize (150, 50)
+	editbox_notes:EnableMouse(true)
 	
 	screen_frame.text = editbox_notes
 	
@@ -726,6 +728,7 @@ function Notepad.BuildOptions (frame)
 	
 	local main_frame = frame
 	main_frame:SetSize (640, 480)
+	main_frame:EnableMouse(true)
 	Notepad.main_frame = main_frame
 
 	main_frame:SetScript ("OnShow", function()
@@ -861,24 +864,6 @@ function Notepad.BuildOptions (frame)
 			name = "Background Color",
 			
 		},
-		
-		--
-		{
-			type = "blank",
-		},
-		--
-		
-		{
-			type = "toggle",
-			get = function() return Notepad.db.hide_on_combat end,
-			set = function (self, fixedparam, value) 
-				Notepad.db.hide_on_combat = value
-				Notepad:UpdateScreenFrameSettings()
-			end,
-			desc = "",
-			name = "Hide in Combat",
-			
-		},
 	}
 	
 	local options_text_template = Notepad:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE")
@@ -964,6 +949,7 @@ function Notepad.BuildOptions (frame)
 	editbox_notes:SetBackdrop ({edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1, tileSize = 64, tile = true, bgFile = [[Interface\Tooltips\UI-Tooltip-Background]]})
 	editbox_notes:SetBackdropBorderColor (0, 0, 0, 0)
 	editbox_notes:SetBackdropColor (0.4, 0.4, 0.4, 0.4)
+	editbox_notes:EnableMouse(true)
 	DetailsFramework:ReskinSlider (editbox_notes.scroll)
 	
 	-- .scroll .editbox
@@ -1334,11 +1320,12 @@ function Notepad.BuildOptions (frame)
 	local label_iconcooldowns = Notepad:CreateLabel (colors_panel, "Cooldowns" .. ":", Notepad:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
 	label_iconcooldowns:SetPoint ("topleft", editbox_notes, "topright", 10, -147)
 	
-	--local cooldown_icon_path = [[|TICONPATH:12:12:0:0:64:64:5:59:5:59|t]]
-	local cooldown_icon_path = [[|TICONPATH:0|t]]
+	local cooldown_icon_path = [[|TICONPATH:]]..(Notepad.db.text_size * 2)..[[:]]..(Notepad.db.text_size * 2)..[[:0:0:64:64:5:59:5:59|t]]
+	--local cooldown_icon_path = [[|TICONPATH:0|t]]
 	local on_spellcooldown_selection = function (self, button, spellid)
 		local spellname, rank, iconpath = GetSpellInfo (spellid)
-		main_frame.editbox_notes.editbox:Insert (cooldown_icon_path:gsub ([[ICONPATH]], iconpath) .. " " .. spellname)
+		main_frame.editbox_notes.editbox:Insert (cooldown_icon_path:gsub ([[ICONPATH]], iconpath) .. "|Hspell:" .. spellid .."|h|r|cff71d5ff[" .. spellname .. "]|r|h")
+		main_frame.editbox_notes.editbox:EnableMouse(true)
 	end
 	
 	local i, o, index = 1, 1, 1
@@ -1349,7 +1336,7 @@ function Notepad.BuildOptions (frame)
 	local on_enter_cooldown = function (self)
 		local button = self.MyObject
 		GameTooltip:SetOwner (self, "ANCHOR_RIGHT")
-		GameTooltip:SetSpellByID (button.spellid)
+		GameTooltip:SetHyperlink("spell:"..button.spellid)
 		GameTooltip:Show()
 	end
 	
@@ -1370,6 +1357,7 @@ function Notepad.BuildOptions (frame)
 					spell:SetPoint ("topleft", editbox_notes, "topright", 10 + ((i-1)*19), -141 + (o*19*-1))
 					spell:SetHook ("OnEnter", on_enter_cooldown)
 					spell:SetHook ("OnLeave", on_leave_cooldown)
+					spell:EnableMouse(true)
 					spell.spellid = spellid
 					local spell_texture = spell:CreateTexture (nil, "background")
 					spell_texture:SetTexture (spellicon)
@@ -1413,7 +1401,7 @@ function Notepad.BuildOptions (frame)
 	local on_enter_bossspell = function (self)
 		local button = self.MyObject
 		GameTooltip:SetOwner (self, "ANCHOR_RIGHT")
-		GameTooltip:SetSpellByID (button.spellid)
+		GameTooltip:SetHyperlink("spell:"..button.spellid)
 		GameTooltip:Show()
 	end
 	
@@ -1459,6 +1447,7 @@ function Notepad.BuildOptions (frame)
 							boss_abilities_buttons [button_index] = button
 							button:SetHook ("OnEnter", on_enter_bossspell)
 							button:SetHook ("OnLeave", on_leave_bossspell)
+							button:EnableMouse(true)
 							button:SetBackdrop (button_bossspell_backdrop)
 							button:SetPoint ("topleft", editbox_notes, "topright", 10 + ((i-1)*19), -238 + (o*19*-1))
 						end
@@ -1489,12 +1478,12 @@ function Notepad.BuildOptions (frame)
 	local label_keywords = Notepad:CreateLabel (colors_panel, "Keywords" .. ":", Notepad:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
 	label_keywords:SetPoint ("topleft", editbox_notes, "topright", 10, -370)
 	
-	local localized_keywords = {"Cooldowns", "Phase", "Dispell", "Interrupt", "Adds", "Sequence", "Second Pot At", "Tanks", "Dps", "Healers", "Transition"}
+	local localized_keywords = {"Cooldowns", "Phase", "Dispell", "Interrupt", "Adds", "Personals", "Second Pot At", "Tanks", "Dps", "Healers"}
 	
 	if (UnitFactionGroup("player") == "Horde") then
 		tinsert (localized_keywords, "Bloodlust At")
 	else
-		tinsert (localized_keywords, "Heroism")
+		tinsert (localized_keywords, "Heroism At")
 	end
 	
 	local on_keyword_selection = function (self, button, keyword)
@@ -1521,6 +1510,7 @@ function Notepad.BuildOptions (frame)
 		keyword_button:SetPoint ("topleft", editbox_notes, "topright", 8 + ((i-1)*85), -375 + (o*13*-1))
 		keyword_button:SetHook ("OnEnter", on_enter_keyword)
 		keyword_button:SetHook ("OnLeave", on_leave_keyword)
+		keyword_button:EnableMouse(true)
 		keyword_button.textsize = 10
 		keyword_button.textface = "Friz Quadrata TT"
 		keyword_button.textcolor = "white"
@@ -1753,7 +1743,7 @@ function Notepad:AskForEnabledNote()
 end
 
 function Notepad.OnReceiveComm (prefix, sourcePluginVersion, sourceUnit, fullNote, noteSeed, noteDate)
-	
+	print(prefix, sourcePluginVersion, sourceUnit, fullNote, noteSeed, noteDate)
 	local ZoneName, InstanceType, DifficultyID = GetInstanceInfo()
 	if (DifficultyID and DifficultyID == 17) then
 		return
@@ -1762,7 +1752,7 @@ function Notepad.OnReceiveComm (prefix, sourcePluginVersion, sourceUnit, fullNot
 	--> Full Note - the user received a note from the Raid Leader
 	if (prefix == COMM_RECEIVED_FULLNOTE) then
 		--> check if the sender is the raid leader
-
+		print(prefix, sourcePluginVersion, sourceUnit, fullNote, noteSeed, noteDate)
 		if ((not IsInRaid() and not IsInGroup()) or not is_raid_leader (sourceUnit)) then
 			return
 		end

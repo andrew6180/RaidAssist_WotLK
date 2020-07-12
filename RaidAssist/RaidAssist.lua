@@ -160,6 +160,7 @@ end
 local DATABASE = "RADataBase"
 local FOLDERPATH = "RaidAssist"
 local _
+local LibDeflate = LibStub("LibDeflate")
 
 --the addon already loaded?
 if (_G.RaidAssist) then
@@ -687,13 +688,20 @@ end
 
 --comunication
 RA.comm = {}
-RA.commPrefix = "RAST"
+RA.commPrefix = "RASTWTLK"
 
 function RA:CommReceived (_, data)
-	local prefix =  select (2, RA:Deserialize (data))
+
+	local decoded = LibDeflate:DecodeForPrint(data)
+	if not decoded then 
+		return
+	end
+
+	local decompressed = LibDeflate:DecompressDeflate(decoded)
+	local ok, prefix, data = RA:Deserialize(decompressed)
 	local func = RA.comm [prefix]
 	if (func) then
-		local values = {RA:Deserialize (data)}
+		local values = {RA:Deserialize (decompressed)}
 		if (values [1]) then
 			tremove (values, 1) --remove the Deserialize state
 			local state, errortext = pcall (func, unpack (values))
