@@ -82,15 +82,21 @@ CrossGamble.OnEnable = function (plugin)
 	CrossGamble.activeRoll = {
 		rolls = {},
 		item = nil,
-		rolling = false,
+        rolling = false,
+        acceptingPlayers = false,
 		timers = {}
     }
     if not CrossGamble.Panel then 
         CrossGamble.BuildFrame()
     end
     CrossGamble:RegisterEvent("CHAT_MSG_SYSTEM", CrossGamble.CHAT_MSG_ROLL)
-    
+    CrossGamble:RegisterEvent("CHAT_MSG_RAID", CrossGamble.CHAT_MSG)
+    CrossGamble:RegisterEvent("CHAT_MSG_PARTY", CrossGamble.CHAT_MSG)
+    CrossGamble:RegisterEvent("CHAT_MSG_RAID_LEADER", CrossGamble.CHAT_MSG)
+    CrossGamble:RegisterEvent("CHAT_MSG_PARTY_LEADER", CrossGamble.CHAT_MSG)
+
     SLASH_CrossGamble1 = "/cg"
+
     function SlashCmdList.CrossGamble (msg, editbox)
         cap = tonumber(msg)
         if not cap then
@@ -111,6 +117,10 @@ CrossGamble.OnDisable = function (plugin)
         CrossGamble.Panel:Hide()
     end
     CrossGamble:UnregisterEvent("CHAT_MSG_SYSTEM", CrossGamble.CHAT_MSG_ROLL)
+    CrossGamble:UnregisterEvent("CHAT_MSG_RAID", CrossGamble.CHAT_MSG)
+    CrossGamble:UnregisterEvent("CHAT_MSG_PARTY", CrossGamble.CHAT_MSG)
+    CrossGamble:UnregisterEvent("CHAT_MSG_RAID_LEADER", CrossGamble.CHAT_MSG)
+    CrossGamble:UnregisterEvent("CHAT_MSG_PARTY_LEADER", CrossGamble.CHAT_MSG)
     SLASH_CrossGamble1 = nil
 end
 
@@ -136,13 +146,6 @@ function CrossGamble.BuildFrame()
     local frame = CrossGamble:CreateCleanFrame(CrossGamble, "RAACrossGambleFrame") 
     frame:SetSize(350, 120)
 
-    local ProgressBar = CrossGamble:CreateBar(frame, nil, 350, 16, 100) 
-    ProgressBar:SetFrameLevel(frame:GetFrameLevel()+1)
-    ProgressBar.RightTextIsTimer = true 
-    ProgressBar.BarIsInverse = true 
-    ProgressBar:SetPoint ("topleft", frame, "topleft", 10, -50)
-    ProgressBar:SetPoint ("topright", frame, "topright", -10, 50)
-    ProgressBar.texture = "Iskar Serenity"
 
     local itemString = CrossGamble:CreateLabel(frame, "ITEM_NAME")
     itemString:SetPoint("topleft", frame, "topleft", 8, -10)
@@ -155,7 +158,7 @@ function CrossGamble.BuildFrame()
     for i = 1, 40 do 
         local Cross = CrossGamble:CreateImage (frame, "Interface\\Glues\\LOGIN\\Glues-CheckBox-Check", 16, 16, "overlay")
         local Label = CrossGamble:CreateLabel (frame, "Player Name")
-        local RollLabel = CrossGamble:CreateLabel(frame, "999")
+        local RollLabel = CrossGamble:CreateLabel(frame, "")
         Label:SetPoint ("left", Cross, "right", 2, 0)
         RollLabel:SetPoint("left", Label, "right", 2, 0)
         Cross.Label = Label
@@ -170,7 +173,14 @@ function CrossGamble.BuildFrame()
 		Cross:Hide()
         tinsert (CrossGamble.PlayerList, Cross)
     end
-    local ebutton = CrossGamble:CreateButton(frame, CrossGamble.EndRollEarly, 100, 20, "End CrossGamble", _, _, _, "ebutton", _, _, CrossGamble:GetTemplate("button", "OPTIONS_BUTTON_TEMPLATE"), CrossGamble:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
+    local end_button_func = function()
+        if CrossGamble.activeRoll.rolling then 
+            CrossGamble:EndRollEarly()
+        elseif CrossGamble.activeRoll.acceptingPlayers then 
+            CrossGamble:StartRoll()
+        end
+    end
+    local ebutton = CrossGamble:CreateButton(frame, end_button_func, 100, 20, "End CrossGamble", _, _, _, "ebutton", _, _, CrossGamble:GetTemplate("button", "OPTIONS_BUTTON_TEMPLATE"), CrossGamble:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
     local cbutton = CrossGamble:CreateButton(frame, CrossGamble.CancelRoll, 100, 20, "Cancel CrossGamble", _, _, _, "cbutton", _, _, CrossGamble:GetTemplate("button", "OPTIONS_BUTTON_TEMPLATE"), CrossGamble:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
 
     ebutton:SetPoint("bottomleft", frame, "bottomleft", 0, 0)
@@ -180,8 +190,8 @@ function CrossGamble.BuildFrame()
     cbutton:SetFrameLevel(ebutton:GetFrameLevel())
 
     CrossGamble.Panel = frame 
-    CrossGamble.ProgressBar = ProgressBar 
     CrossGamble.ItemString = itemString
+    CrossGamble.endButton = ebutton
 end
 
 
@@ -234,7 +244,39 @@ function CrossGamble.BuildOptions (frame)
 end
 
 function CrossGamble:StartRoll()
-    allow_roll = true
+    CrossGamble.activeRoll.rolling = true 
+    CrossGamble.activeRoll.acceptingPlayers = false
+    local players = ""
+
+    for player in pairs(CrossGamble.activeRoll.players) do 
+        if players == "" then
+             players = player
+        else
+            players = players..", "..player
+        end
+    end
+
+    CrossGamble:Say("[/roll 1-"..CrossGamble.activeRoll.cap.."]: "..players)
+
+    CrossGamble.endButton:SetText("End Roll")
+
+    for _, slot in ipairs(CrossGamble.PlayerList) do 
+        slot:Hide()
+    end
+
+    CrossGamble:UpdatePanel()
+end
+
+function CrossGamble:CHAT_MSG(msg, author)
+    if CrossGamble.activeRoll.acceptingPlayers then 
+        if msg == "1" and not CrossGamble.activeRoll.players[author] then 
+            CrossGamble.activeRoll.players[author] = true
+            CrossGamble:UpdatePanel()
+        elseif msg == "-1" and CrossGamble.activeRoll.players[author] then 
+            CrossGamble.activeRoll.players[author] = nil
+            CrossGamble:UpdatePanel()
+        end
+    end
 end
 
 
@@ -265,8 +307,23 @@ function CrossGamble:CHAT_MSG_ROLL(text, ...)
     end
 
     if  CrossGamble.activeRoll.rolling and (low == 1 and high == CrossGamble.activeRoll.cap) then
-        tinsert(CrossGamble.activeRoll.rolls, {name, roll})
-        CrossGamble.UpdatePanel()
+        if CrossGamble.activeRoll.players[name] then
+            CrossGamble.activeRoll.players[name] = false
+            tinsert(CrossGamble.activeRoll.rolls, {name, roll})
+            CrossGamble.UpdatePanel()
+
+            local continue_roll = false 
+            for _, active in pairs(CrossGamble.activeRoll.players) do 
+                if active then 
+                    continue_roll = true 
+                    break
+                end
+            end
+
+            if not continue_roll then 
+                CrossGamble:EndRoll()
+            end
+        end
     end
 end
 
@@ -287,6 +344,7 @@ function CrossGamble:Say(msg, loud)
 
         if channel then
             SendChatMessage("[RAA] Cross Gambling: "..msg, channel)
+            --print("[RAA] Cross Gambling: "..msg)
         end
 end
 
@@ -294,36 +352,60 @@ function CrossGamble.UpdatePanel()
     tsort(CrossGamble.activeRoll.rolls, function(a, b) return a[2] > b[2] end)
     local i = 1
 
-    for _, data in ipairs(CrossGamble.activeRoll.rolls) do 
-        local name, roll = unpack(data)
-        local _, class = UnitClass(name)
-        local slot = CrossGamble.PlayerList[i] 
-        slot:Show()
-        slot.Label:Show()
-        slot.RollLabel:Show()
+    if CrossGamble.activeRoll.acceptingPlayers then 
+        for name, active in pairs(CrossGamble.activeRoll.players) do 
+            local _, class = UnitClass(name)
+            local slot = CrossGamble.PlayerList[i]
 
-        if i == 1 then
-            slot:SetTexture([[Interface\Buttons\UI-GroupLoot-Coin-Up]])
-        elseif i == #CrossGamble.activeRoll.rolls then 
-            slot:SetTexture("Interface\\AddOns\\" .. RA.InstallDir .. "\\media\\Check")
-        else
-            slot:SetTexture("Interface\\Glues\\LOGIN\\Glues-CheckBox-Check")
+            if active then
+                 
+                slot:Show()
+                slot.Label:Show()
+                slot.RollLabel:Hide()
+                slot:SetTexture("Interface\\AddOns\\" .. RA.InstallDir .. "\\media\\Check")
+
+                slot:SetTexCoord(0, 1, 0, 1)
+                local color = class and RAID_CLASS_COLORS [class] and RAID_CLASS_COLORS [class].colorStr or "ffffffff"
+                slot.Label:SetText("|c" .. color .. name .. "|r")
+            else
+                slot:Hide()
+            end
+
+            i = i + 1
         end
 
-        slot:SetTexCoord(0, 1, 0, 1)
-        local color = class and RAID_CLASS_COLORS [class] and RAID_CLASS_COLORS [class].colorStr or "ffffffff"
-        slot.Label:SetText("|c" .. color .. name .. "|r")
-        slot.RollLabel:SetText("|cFFebe534"..roll.."|r")
-        i = i + 1
+    elseif CrossGamble.activeRoll.rolling then
+
+        for _, data in ipairs(CrossGamble.activeRoll.rolls) do 
+            local name, roll = unpack(data)
+            local _, class = UnitClass(name)
+            local slot = CrossGamble.PlayerList[i] 
+            slot:Show()
+            slot.Label:Show()
+            slot.RollLabel:Show()
+
+            if i == 1 then
+                slot:SetTexture([[Interface\Buttons\UI-GroupLoot-Coin-Up]])
+            elseif i == #CrossGamble.activeRoll.rolls then 
+                slot:SetTexture("Interface\\Glues\\LOGIN\\Glues-CheckBox-Check")
+            else
+                slot:SetTexture("Interface\\AddOns\\" .. RA.InstallDir .. "\\media\\Check")
+            end
+
+            slot:SetTexCoord(0, 1, 0, 1)
+            local color = class and RAID_CLASS_COLORS [class] and RAID_CLASS_COLORS [class].colorStr or "ffffffff"
+            slot.Label:SetText("|c" .. color .. name .. "|r")
+            slot.RollLabel:SetText("|cFFebe534"..roll.."|r")
+            i = i + 1
+        end
     end
 
     CrossGamble.Panel:SetHeight (120 + (math.ceil ((i-1) / 2) * 17))
 end
 
-function CrossGamble:ShowRollPanel(cap, timelimit)
+function CrossGamble:ShowRollPanel(cap)
     wipe(CrossGamble.activeRoll.rolls) -- clean just incase 
     CrossGamble.Panel:Show()
-    CrossGamble.ProgressBar:SetTimer(timelimit + 1)
     CrossGamble.ItemString.text = "CrossGamble for: "..comma_value(CrossGamble.activeRoll.cap)
 
     for Index, Player in ipairs (CrossGamble.PlayerList) do
@@ -334,24 +416,12 @@ function CrossGamble:ShowRollPanel(cap, timelimit)
 end
 
 function CrossGamble:StartNewRoll(cap)
-    CrossGamble.activeRoll.rolling = true
-    CrossGamble.activeRoll.acceptingRolls = true
+    CrossGamble.activeRoll.acceptingPlayers = true
     CrossGamble.activeRoll.cap = cap
-    local timelimit = CrossGamble.db.roll_time or 60
-
-    CrossGamble:ShowRollPanel(CrossGamble.activeRoll.cap, timelimit)
-
-    CrossGamble:Say("[/roll 1-"..tostring(cap).."] to enter. Ending in "..timelimit.." seconds!")
-    CrossGamble:ScheduleEndRoll(timelimit)
-end
-
-function CrossGamble:ScheduleEndRoll(timelimit)
-	local timers = {}
-	tinsert(timers, C_Timer.NewTimer(timelimit-6, function() 
-		tinsert(timers, C_Timer.NewTicker(1, function(ticker) CrossGamble:Say("roll Ending in "..ticker._remainingIterations) end, 5))
-	end))
-	tinsert(timers, C_Timer.NewTimer(timelimit, CrossGamble.EndRoll))
-    CrossGamble.activeRoll.timers = timers
+    CrossGamble.activeRoll.players = {}
+    CrossGamble:ShowRollPanel(CrossGamble.activeRoll.cap)
+    CrossGamble.endButton:SetText("Start Roll")
+    CrossGamble:Say("["..comma_value(cap).."] Type 1 to enter, -1 to leave.")
 end
 
 
@@ -377,11 +447,12 @@ end
 
 
 function CrossGamble:FinalizeRoll()
-    CrossGamble.Panel:Hide()
+    C_Timer.After(2, function() CrossGamble.Panel:Hide() end)
     CrossGamble.activeRoll.timers = {}
     CrossGamble.activeRoll.rolls = {}
+    CrossGamble.activeRoll.players = {}
     CrossGamble.activeRoll.rolling = false
-    CrossGamble.activeRoll.acceptingRolls = false
+    CrossGamble.activeRoll.acceptingPlayers = false
 end
 
 
@@ -398,7 +469,7 @@ end
 
 
 function CrossGamble:CancelRoll()
-    if CrossGamble.activeRoll.rolling then 
+    if CrossGamble.activeRoll.rolling or CrossGamble.activeRoll.acceptingPlayers then 
         for _, timer in ipairs(CrossGamble.activeRoll.timers) do 
             timer:Cancel()
         end
