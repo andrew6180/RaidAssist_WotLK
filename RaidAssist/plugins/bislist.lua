@@ -321,6 +321,8 @@ function BisList.BuildOptions (frame)
 			return 
 		end
 
+		GameTooltip:SetHyperlink("item:"..itemid)
+
 		local this = obj.MyObject.editbox
 		local showing, width = 0, 0
 		if (not queued and select_item_frame:IsShown() and slotid == select_item_frame.current_slotid) then
