@@ -23,7 +23,8 @@ local default_config = {
 	show_window_after = 0.9,
 	text_size = 10,
 	text_face = "Friz Quadrata TT",
-	text_shadow = false,
+    text_shadow = false,
+    winnings = {}
 }
 
 local CrossGamble = {version = "v0.1", pluginname = "Cross Gamble"}
@@ -59,7 +60,7 @@ end
 
 CrossGamble.OnInstall = function (plugin)
 	CrossGamble.db.menu_priority = default_priority
-
+    CrossGamble.db.winnings = CrossGamble.db.winnings or {}
 	if CrossGamble.db.enabled then 
 		CrossGamble.OnEnable(plugin)
 	end
@@ -99,15 +100,47 @@ CrossGamble.OnEnable = function (plugin)
 
     function SlashCmdList.CrossGamble (msg, editbox)
         cap = tonumber(msg)
-        if not cap then
-            DEFAULT_CHAT_FRAME:AddMessage(msg .. " is not a number...")
+        if not cap and string.lower( msg ) ~= "report" and string.lower( msg ) ~= "reset" then
+            DEFAULT_CHAT_FRAME:AddMessage("Usage: /cg <number 1-10000>")
+            DEFAULT_CHAT_FRAME:AddMessage("/cg report")
             return 
         end
-        if cap > 10000 then 
+        if cap and cap > 10000 then 
             DEFAULT_CHAT_FRAME:AddMessage("Rolls are capped at 10,000 in 3.3.5, sorry.")
             return 
         end
-	    CrossGamble:StartNewRoll(cap)
+
+        if cap then
+            CrossGamble:StartNewRoll(cap)
+        end
+
+        if string.lower( msg ) == "report" then 
+           CrossGamble:Say("Reporting top 3 winners & top 3 losers")
+           tsort(CrossGamble.db.winnings, function(a, b) return a[2] > b[2] end)
+
+           local last = 1
+            for i, player in ipairs(CrossGamble.db.winnings) do 
+                local winner, earnings = unpack(player)
+
+                if i <= 3 or i >= #CrossGamble.db.winnings - 2 then
+                    local winmsg = "won" 
+                    if earnings < 0 then 
+                        winmsg = "lost"
+                    end
+                    if last + 1 < i then 
+                        CrossGamble:Say("...")
+                    end
+                    CrossGamble:Say(i..". ["..winner.."] has "..winmsg.." "..comma_value(earnings).."g!")
+                    last = i
+                end
+
+            end
+        end
+
+        if string.lower ( msg ) == "reset" then 
+            CrossGamble.db.winnings = {}
+            DEFAULT_CHAT_FRAME:AddMessage("Reset CrossGambling DB.")
+        end
     end
 end
 
@@ -256,15 +289,13 @@ function CrossGamble:StartRoll()
         end
     end
 
-    CrossGamble:Say("[/roll 1-"..CrossGamble.activeRoll.cap.."]: "..players)
+    CrossGamble:Say("[/roll 1-"..CrossGamble.activeRoll.cap.."g]: "..players)
 
     CrossGamble.endButton:SetText("End Roll")
 
     for _, slot in ipairs(CrossGamble.PlayerList) do 
         slot:Hide()
     end
-
-    CrossGamble:UpdatePanel()
 end
 
 function CrossGamble:CHAT_MSG(msg, author)
@@ -358,7 +389,7 @@ function CrossGamble.UpdatePanel()
             local slot = CrossGamble.PlayerList[i]
 
             if active then
-                 
+                 slot.name = name
                 slot:Show()
                 slot.Label:Show()
                 slot.RollLabel:Hide()
@@ -369,6 +400,7 @@ function CrossGamble.UpdatePanel()
                 slot.Label:SetText("|c" .. color .. name .. "|r")
             else
                 slot:Hide()
+                slot.name = nil
             end
 
             i = i + 1
@@ -379,7 +411,17 @@ function CrossGamble.UpdatePanel()
         for _, data in ipairs(CrossGamble.activeRoll.rolls) do 
             local name, roll = unpack(data)
             local _, class = UnitClass(name)
-            local slot = CrossGamble.PlayerList[i] 
+            local slot
+            for _, s in ipairs(CrossGamble.PlayerList) do 
+                if s.name == name then 
+                    slot = s
+                    break
+                end
+            end
+            if not slot then 
+                slot = CrossGamble.PlayerList[i] 
+            end
+            slot.name = nil
             slot:Show()
             slot.Label:Show()
             slot.RollLabel:Show()
@@ -431,12 +473,33 @@ function CrossGamble:EndRoll()
 
     winner = CrossGamble.activeRoll.rolls[1]
     loser = CrossGamble.activeRoll.rolls[#CrossGamble.activeRoll.rolls]
-
+    local db = CrossGamble.db
 
     if winner and loser and winner ~= loser then
 
         local diff = winner[2] - loser[2]
         
+        local did_winner, did_loser = false, false
+        for i, player in ipairs(CrossGamble.db.winnings) do 
+            local name, earned = unpack(player)
+            if name == winner[1] then 
+                earned = earned + diff
+                CrossGamble.db.winnings[i] = {name, earned}
+                did_winner = true 
+            elseif name == loser[1] then
+                earned = earned - diff
+                CrossGamble.db.winnings[i] = {name, earned}
+                did_loser = true
+            end
+        end
+
+        if not did_winner then 
+            tinsert(CrossGamble.db.winnings, {winner[1], diff})
+        end
+        if not did_loser then 
+            tinsert(CrossGamble.db.winnings, {loser[1], -diff})
+        end
+
         CrossGamble:Say(loser[1].." owes "..winner[1].." "..comma_value(diff).. "g!")
     else 
         CrossGamble:Say("Less than two people entered. Ended roll.")
