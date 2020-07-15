@@ -25,8 +25,9 @@ local default_config = {
 	background = {r=0, g=0, b=0, a=0.3, show = true},
 	hide_on_combat = false,
 	auto_format = true,
-	auto_complete = true,
+	auto_complete = false,
 }
+
 
 local icon_texture
 local icon_texcoord = {l=4/32, r=28/32, t=4/32, b=28/32}
@@ -394,7 +395,7 @@ end
 
 Notepad.OnEnable = function (plugin)
 	-- enabled from the options panel.
-	
+	Notepad.db.auto_complete = false
 end
 
 Notepad.OnDisable = function (plugin)
@@ -618,11 +619,6 @@ function Notepad:ShowNoteOnScreen (note_id)
 		local player_name = UnitName ("player")
 		
 		local locclass, class = UnitClass ("player")
-		local unitclasscolor = RAID_CLASS_COLORS [class] and RAID_CLASS_COLORS [class].colorStr
-		if (unitclasscolor) then
-			formated_text = formated_text:gsub (player_name, "|cFFFFFF00[|r|c" .. unitclasscolor .. string.upper (player_name) .. "|r|cFFFFFF00]|r")
-			formated_text = formated_text:gsub (string.lower (player_name), "|cFFFFFF00[|r|c" .. unitclasscolor .. string.upper (player_name) .. "|r|cFFFFFF00]|r")
-		end
 		
 		Notepad.screen_frame.text:SetText (formated_text)
 		
@@ -1237,8 +1233,8 @@ function Notepad.BuildOptions (frame)
 	"peru", "plum", "tan", "wheat"} --4
 	for o = 1, 4 do
 		for i = 1, 9 do
-			local color_button =  Notepad:CreateButton (colors_panel, on_color_selection, 16, 16, "", colors [index], _, _, "button_color" .. index, _, _, Notepad:GetTemplate ("dropdown", "OPTIONS_DROPDOWN_TEMPLATE"), Notepad:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
-			color_button:SetPoint ("topleft", editbox_notes, "topright", 10 + ((i-1)*17), -20 + (o*17*-1))
+			local color_button =  Notepad:CreateButton (colors_panel, on_color_selection, 24, 24, "", colors [index], _, _, "button_color" .. index, _, _, Notepad:GetTemplate ("dropdown", "OPTIONS_DROPDOWN_TEMPLATE"), Notepad:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
+			color_button:SetPoint ("topleft", editbox_notes, "topright", 10 + ((i-1)*24), -20 + (o*24*-1))
 			local color_texture = color_button:CreateTexture (nil, "background")
 			color_texture:SetTexture (Notepad:ParseColors (colors [index]))
 			color_texture:SetAlpha (0.7)
@@ -1289,7 +1285,7 @@ function Notepad.BuildOptions (frame)
 	
 	--raid targets
 	local label_raidtargets = Notepad:CreateLabel (colors_panel, "Targets" .. ":", Notepad:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
-	label_raidtargets:SetPoint ("topleft", editbox_notes, "topright", 10, -110)
+	label_raidtargets:SetPoint ("topleft", editbox_notes, "topright", 10, -150)
 	
 	--http://wowwiki.wikia.com/wiki/UI_escape_sequences
 	
@@ -1306,8 +1302,8 @@ function Notepad.BuildOptions (frame)
 	local index = 1
 	for o = 1, 1 do
 		for i = 1, 8 do
-			local raidtarget =  Notepad:CreateButton (colors_panel, on_raidtarget_selection, 20, 20, "", index, _, _, "button_raidtarget" .. index, _, _, Notepad:GetTemplate ("dropdown", "OPTIONS_DROPDOWN_TEMPLATE"), Notepad:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
-			raidtarget:SetPoint ("topleft", editbox_notes, "topright", 10 + ((i-1)*20), -101 + (o*21*-1))
+			local raidtarget =  Notepad:CreateButton (colors_panel, on_raidtarget_selection, 32, 32, "", index, _, _, "button_raidtarget" .. index, _, _, Notepad:GetTemplate ("dropdown", "OPTIONS_DROPDOWN_TEMPLATE"), Notepad:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
+			raidtarget:SetPoint ("topleft", editbox_notes, "topright", 10 + ((i-1)*32), -140 + (o*32*-1))
 			local color_texture = raidtarget:CreateTexture (nil, "overlay")
 			color_texture:SetTexture ("Interface\\TARGETINGFRAME\\UI-RaidTargetingIcon_" .. index)
 			color_texture:SetAlpha (0.7)
@@ -1318,14 +1314,13 @@ function Notepad.BuildOptions (frame)
 
 	--cooldowns
 	local label_iconcooldowns = Notepad:CreateLabel (colors_panel, "Cooldowns" .. ":", Notepad:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
-	label_iconcooldowns:SetPoint ("topleft", editbox_notes, "topright", 10, -147)
+	label_iconcooldowns:SetPoint ("topleft", editbox_notes, "topright", 10, -220)
 	
 	local cooldown_icon_path = [[|TICONPATH:]]..(Notepad.db.text_size * 2)..[[:]]..(Notepad.db.text_size * 2)..[[:0:0:64:64:5:59:5:59|t]]
 	--local cooldown_icon_path = [[|TICONPATH:0|t]]
 	local on_spellcooldown_selection = function (self, button, spellid)
 		local spellname, rank, iconpath = GetSpellInfo (spellid)
 		main_frame.editbox_notes.editbox:Insert (cooldown_icon_path:gsub ([[ICONPATH]], iconpath) .. "|Hspell:" .. spellid .."|h|r|cff71d5ff[" .. spellname .. "]|r|h")
-		main_frame.editbox_notes.editbox:EnableMouse(true)
 	end
 	
 	local i, o, index = 1, 1, 1
@@ -1352,9 +1347,9 @@ function Notepad.BuildOptions (frame)
 				if (not spell_added [spellid]) then
 					local spellname, rank, spellicon = GetSpellInfo (spellid)
 				
-					local spell =  Notepad:CreateButton (colors_panel, on_spellcooldown_selection, 18, 18, "", spellid, _, _, "button_cooldown" .. index)
+					local spell =  Notepad:CreateButton (colors_panel, on_spellcooldown_selection, 32, 32, "", spellid, _, _, "button_cooldown" .. index)
 					spell:SetBackdrop (button_cooldown_backdrop)
-					spell:SetPoint ("topleft", editbox_notes, "topright", 10 + ((i-1)*19), -141 + (o*19*-1))
+					spell:SetPoint ("topleft", editbox_notes, "topright", 10 + ((i-1)*32), -210 + (o*32*-1))
 					spell:SetHook ("OnEnter", on_enter_cooldown)
 					spell:SetHook ("OnLeave", on_leave_cooldown)
 					spell:EnableMouse(true)
@@ -1476,7 +1471,7 @@ function Notepad.BuildOptions (frame)
 	
 	--keywords
 	local label_keywords = Notepad:CreateLabel (colors_panel, "Keywords" .. ":", Notepad:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
-	label_keywords:SetPoint ("topleft", editbox_notes, "topright", 10, -370)
+	label_keywords:SetPoint ("topleft", editbox_notes, "topright", 10, -450)
 	
 	local localized_keywords = {"Cooldowns", "Phase", "Dispell", "Interrupt", "Adds", "Personals", "Second Pot At", "Tanks", "Dps", "Healers"}
 	
@@ -1504,14 +1499,14 @@ function Notepad.BuildOptions (frame)
 	end
 	
 	for index, keyword in pairs (localized_keywords) do
-		local keyword_button =  Notepad:CreateButton (colors_panel, on_keyword_selection, 80, 12, keyword, keyword, _, _, "button_keyword" .. index, nil, 1) --short method 1
+		local keyword_button =  Notepad:CreateButton (colors_panel, on_keyword_selection, 80, 24, keyword, keyword, _, _, "button_keyword" .. index, nil, 1) --short method 1
 		keyword_button:SetBackdrop (button_keyword_backdrop)
 		keyword_button:SetBackdropColor (0, 0, 0, 0.4)
-		keyword_button:SetPoint ("topleft", editbox_notes, "topright", 8 + ((i-1)*85), -375 + (o*13*-1))
+		keyword_button:SetPoint ("topleft", editbox_notes, "topright", 8 + ((i-1)*85), -450 + (o*24*-1))
 		keyword_button:SetHook ("OnEnter", on_enter_keyword)
 		keyword_button:SetHook ("OnLeave", on_leave_keyword)
 		keyword_button:EnableMouse(true)
-		keyword_button.textsize = 10
+		keyword_button.textsize = 14
 		keyword_button.textface = "Friz Quadrata TT"
 		keyword_button.textcolor = "white"
 		keyword_button.textalign = "<"
@@ -1637,7 +1632,7 @@ function Notepad.BuildOptions (frame)
 		end
 		
 		main_frame.editbox_notes.editbox.ignore_input = true
-		if (lastword:len() >= 2 and Notepad.db.auto_complete) then
+		if (lastword:len() >= 2 and false) then
 			for i = 1, GetNumGroupMembers() do
 				local name = UnitName ("raid" .. i) or UnitName ("party" .. i)
 				--print (name, string.find ("keyspell", "^key"))
@@ -1743,7 +1738,6 @@ function Notepad:AskForEnabledNote()
 end
 
 function Notepad.OnReceiveComm (prefix, sourcePluginVersion, sourceUnit, fullNote, noteSeed, noteDate)
-	print(prefix, sourcePluginVersion, sourceUnit, fullNote, noteSeed, noteDate)
 	local ZoneName, InstanceType, DifficultyID = GetInstanceInfo()
 	if (DifficultyID and DifficultyID == 17) then
 		return
@@ -1752,7 +1746,6 @@ function Notepad.OnReceiveComm (prefix, sourcePluginVersion, sourceUnit, fullNot
 	--> Full Note - the user received a note from the Raid Leader
 	if (prefix == COMM_RECEIVED_FULLNOTE) then
 		--> check if the sender is the raid leader
-		print(prefix, sourcePluginVersion, sourceUnit, fullNote, noteSeed, noteDate)
 		if ((not IsInRaid() and not IsInGroup()) or not is_raid_leader (sourceUnit)) then
 			return
 		end
