@@ -146,7 +146,6 @@ DF.CooldownsBySpec = {
 			[10278] = 3, --Blessing of Protection
 			[48788] = 3, --Lay on Hands
 		    [6940] = 3, -- Hand of Sacrifice
-
 			[31821] = 4, --Aura Mastery
 
 			[1044] = 5, --Blessing of Freedom
@@ -162,7 +161,8 @@ DF.CooldownsBySpec = {
 			[6940] = 3, -- Hand of Sacrifice
 			[48788] = 3, --Lay on Hands
 			[64205] = 4, -- Divine Sacrifice
-
+			[642] = 2, -- Divine Shield
+			[498] = 2, -- Divine Protection
 			[1044] = 5, --Blessing of Freedom
 			[853] = 5, --Hammer of Justice
 		},
@@ -176,7 +176,8 @@ DF.CooldownsBySpec = {
 			[10278] = 3, --Blessing of Protection
 			[48788] = 3, --Lay on Hands
 			[6940] = 3, -- Hand of Sacrifice
-
+			[642] = 2, -- Divine Shield
+			[498] = 2, -- Divine Protection
 			[1044] = 5, --Blessing of Freedom
 			[853] = 5, --Hammer of Justice
 		},
@@ -283,7 +284,7 @@ DF.CooldownsBySpec = {
 DF.CooldownsInfo = {
 	--> paladin
 	[31884] = {cooldown = 120, duration = 20, talent = false, charges = 1, class = "PALADIN", type = 1}, --Avenging Wrath
-	[498] = {cooldown = 60, duration = 8, talent = false, charges = 1, class = "PALADIN", type = 2}, --Divine Protection
+	[498] = {cooldown = 180, duration = 8, talent = false, charges = 1, class = "PALADIN", type = 2}, --Divine Protection
 	[642] = {cooldown = 300, duration = 8, talent = false, charges = 1, class = "PALADIN", type = 2}, --Divine Shield
 	[64205] = {cooldown = 120, duration = 10, talent = 64205, charges =1, class = "PALADIN", type = 4}, -- Divine Sacrifice
 	[10278] = {cooldown = 300, duration =10, talent = false, charges = 1, class = "PALADIN", type = 3}, -- Hand of Protection

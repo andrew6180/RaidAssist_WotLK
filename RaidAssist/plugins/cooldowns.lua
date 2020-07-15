@@ -137,6 +137,74 @@ end
 
 local TrackingSpells = {}
 
+local GlyphCDs = {
+--[[[spell id] = {
+		new_cd = glyphcd,
+	}--]]
+	[48788] = { -- lay on hands
+		glyph = 57955,
+		cd_reduction = 300,
+	},
+	[6346] = { -- Fear ward
+		glyph = 55678,
+		cd_reduction = 60,
+	},
+	[47585] = { -- Dispersion
+		glyph = 63229,
+		cd_reduction = 45,
+	},
+	[47788] = { -- Guardian Spirit
+		glyph = 63231,
+		cd_reduction = 120,
+	},
+	[12975] = { -- Last Stand
+		glyph = 58376,
+		cd_reduction = 60,
+	},
+	[871] = { -- Shield Wall
+		glyph = 63329,
+		cd_reduction = 120,
+	},
+}
+local CDTalents = {
+--[[[spell id] = {
+		talent_id = talent_id,
+		cd_per_point = cd_per_point,
+	}--]]
+	[48788] = { -- lay on hands
+		talent = GetSpellInfo(20235),
+		cd_per_point = 120, 
+	},
+	[48447] = { -- Tranquility
+		talent = GetSpellInfo(17124),
+		cd_per_point = 144,
+	},
+	[45438] = { -- IceBlcok
+		talent = GetSpellInfo(55094),
+		cd_per_point = 20, --for some reason rank 1 and 2 are both multiples of 7 but rank 3 is fucking 20% reduction so i just went with 20. 
+	},
+	[498] = { -- Divine Protection
+		talent = GetSpellInfo(31848),
+		cd_per_point = 30,
+	},
+	[10278] = { -- Hand of Protection
+		talent = GetSpellInfo(20175),
+		cd_per_point = 60,
+	},
+	[33206] = { -- Pain Suppression 
+		talent = GetSpellInfo(47508),
+		cd_per_point = 18,
+	},
+	[10060] = { -- Pain Suppression 
+		talent = GetSpellInfo(47508),
+		cd_per_point = 12,
+	},
+	[20608] = { -- Reincarnation
+		talent = GetSpellInfo(16209),
+		cd_per_point = 450,
+	},
+}
+
 local get_unit_name = function (unitid)
 	local name = GetUnitName (unitid, true)
 	if (name) then
@@ -165,7 +233,13 @@ local spell_list = {}
 for specID, cooldowns in pairs (DF.CooldownsBySpec) do
 	local class = DF.SpecIds [specID]
 	for spellID, cooldownType in pairs (cooldowns) do
+		if spellID == 498 then 
+			print("498 is trying")
+		end
 		if GetSpellInfo (spellID) ~= nil then -- lets grab real spells in the game lol
+			if spellID == 498 then 
+				print("498 passed")
+			end
 			local cooldownInfo = DF.CooldownsInfo [spellID]
 			if (cooldownInfo) then
 				local classTable = spell_list [cooldownInfo.class] or {}
@@ -173,7 +247,9 @@ for specID, cooldowns in pairs (DF.CooldownsBySpec) do
 				
 				local specTable = classTable [specID] or {}
 				classTable [specID] = specTable
-			
+				if spellID == 498 then 
+					print(cooldownInfo.cooldown, cooldownInfo.talent, cooldownType, cooldownInfo.duration, cooldownInfo.charges)
+				end
 				specTable [spellID] = {
 					cooldown = cooldownInfo.cooldown,
 					need_talent = cooldownInfo.talent,
@@ -399,12 +475,11 @@ function Cooldowns.CheckUnitCooldowns (unitID, groupType, groupIndex)
 		local name = get_unit_name (unitID)
 		local unit_table = Cooldowns.Roster [info.class_id] [name]
 		
-		--print (info.class, spell_list [info.class])
-		
-		local _, class = UnitClass (unitID)
-		local unit_spells = spell_list [info.class or class] and spell_list [info.class or class] [info.global_spec_id]
-		--print("dump spells for ", name, info.global_spec_id)
-		--DevTools_Dump(unit_spells)
+		local unit_spells = spell_list [info.class] and spell_list [info.class] [info.global_spec_id]
+		if (info.class ~= "PRIEST") then 
+			print("dump spells for ", name, info.global_spec_id)
+			DevTools_Dump(unit_spells)
+		end
 		local spells_added = {}
 		for spellid, spelltable in pairs (unit_spells or {}) do
 		
@@ -1113,6 +1188,25 @@ function Cooldowns.BarControl (update_type, unitid, spellid)
 			
 			local spell_blueprint = spell_list [class_name] [player.spec] [spellid]
 			local cooldown = spell_blueprint.cooldown
+			local active_tree = LibGroupTalents:GetActiveTalentGroup(unitid)
+
+			if active_tree then 
+				if GlyphCDs[spellid] then 
+					if LibGroupTalents:UnitHasGlyph(unitid, GlyphCDs[spellid].glyph, active_tree) then 
+						cooldown = cooldown - GlyphCDs[spellid].cd_reduction
+					end
+				end
+
+				if CDTalents[spellid] then 
+					local points = LibGroupTalents:UnitHasTalent(unitid, CDTalents[spellid].talent, active_tree)
+					if points and points > 0 then 
+						for i = 1, points do 
+							cooldown = cooldown - CDTalents[spellid].cd_per_point
+						end
+					end
+				end
+			end
+
 			local type = spell_blueprint.type
 
 			local spellname = GetSpellInfo (spellid)
