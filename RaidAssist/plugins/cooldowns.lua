@@ -476,10 +476,6 @@ function Cooldowns.CheckUnitCooldowns (unitID, groupType, groupIndex)
 		local unit_table = Cooldowns.Roster [info.class_id] [name]
 		
 		local unit_spells = spell_list [info.class] and spell_list [info.class] [info.global_spec_id]
-		if (info.class ~= "PRIEST") then 
-			print("dump spells for ", name, info.global_spec_id)
-			DevTools_Dump(unit_spells)
-		end
 		local spells_added = {}
 		for spellid, spelltable in pairs (unit_spells or {}) do
 		
