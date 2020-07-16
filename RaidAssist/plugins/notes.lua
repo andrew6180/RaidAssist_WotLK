@@ -519,7 +519,9 @@ function Notepad.DeleteCurrentNote()
 	Notepad:CancelNoteEditing()
 	
 	--> erase it
-	Notepad.db.notes [id] = nil
+	if id and Notepad.db.notes[id] then
+		Notepad.db.notes [id] = nil
+	end
 end
 
 function Notepad:SetCurrentEditingNote (note_id)
