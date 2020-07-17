@@ -381,7 +381,7 @@ function Roll:Say(msg, loud)
 end
 
 function Roll.UpdatePanel() 
-    tsort(Roll.activeRoll.rolls, function(a, b) return a[2] > b[2] end)
+    tsort(Roll.activeRoll.rolls, function(a, b) if a and b then return a[2] > b[2] else return true end end)
     local i = 1
 
     for _, data in ipairs(Roll.activeRoll.rolls) do 
@@ -412,7 +412,7 @@ function Roll:ShowRollPanel(itemLink, timelimit)
     wipe(Roll.activeRoll.rolls) -- clean just incase 
     Roll.Panel:Show()
     Roll.ProgressBar:SetTimer(timelimit + 1)
-    Roll.ItemString.text = "Roll for: " .. itemLink 
+    Roll.ItemString.text = "Roll for: " .. tostring(itemLink) 
     if (Roll.activeRoll.count > 1) then 
         Roll.ItemString.text = Roll.ItemString.text .. " x"..Roll.activeRoll.count 
     end
@@ -461,7 +461,7 @@ function Roll:StartReroll(rerolls)
     Roll:Say(players .. " Reroll for " .. Roll.activeRoll.item, true)
     local timelimit = Roll.db.reroll_time or 20
 
-    Roll:ShowRollPanel(itemLink, timelimit)
+    Roll:ShowRollPanel(Roll.activeRoll.item, timelimit)
 
     Roll:Say("Roll ending in " .. timelimit .. " seconds!") 
 
