@@ -127,7 +127,7 @@ CrossGamble.OnEnable = function (plugin)
                     if earnings < 0 then 
                         winmsg = "lost"
                     end
-                    if last + 1 < i then 
+                    if last == 3 then 
                         CrossGamble:Say("...")
                     end
                     CrossGamble:Say(i..". ["..winner.."] has "..winmsg.." "..comma_value(earnings).."g!")
