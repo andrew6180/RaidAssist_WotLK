@@ -437,7 +437,7 @@ function ReadyCheck:READY_CHECK_FINISHED (event, arg2, arg3)
 			SendChatMessage(output, "PARTY")
 		end
 
-	elseif not UnitIsGroupLeader("player") then
+	else
 		local all_ready = true
 		for _, status in pairs(ReadyCheck.AnswerTable) do 
 			if status ~= true then
@@ -473,7 +473,7 @@ local install_status = RA:InstallPlugin ("Ready Check", "RAReadyCheck", ReadyChe
 
 
 function ReadyCheck.OnReceiveComm (prefix, sourcePluginVersion, player, status)
-	if UnitIsGroupLeader("player") then 
+	if UnitIsGroupLeader("player") or player == UnitName("player") then 
 		return 
 	end
 	if (prefix == COMM_READY_CHECK) then 

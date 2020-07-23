@@ -234,11 +234,9 @@ for specID, cooldowns in pairs (DF.CooldownsBySpec) do
 	local class = DF.SpecIds [specID]
 	for spellID, cooldownType in pairs (cooldowns) do
 		if spellID == 498 then 
-			print("498 is trying")
 		end
 		if GetSpellInfo (spellID) ~= nil then -- lets grab real spells in the game lol
 			if spellID == 498 then 
-				print("498 passed")
 			end
 			local cooldownInfo = DF.CooldownsInfo [spellID]
 			if (cooldownInfo) then
