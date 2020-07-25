@@ -408,7 +408,7 @@ function CrossGamble.UpdatePanel()
             if not slot then 
                 slot = CrossGamble.PlayerList[i] 
             end
-            slot.name = nil
+            slot.name = name
             slot:Show()
             slot.Label:Show()
             slot.RollLabel:Show()
