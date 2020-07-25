@@ -249,19 +249,6 @@ function CrossGamble.BuildOptions (frame)
 		
 		{type = "blank"},
 		--{type = "label", get = function() return "Text Settings:" end, text_template = CrossGamble:GetTemplate ("font", "ORANGE_FONT_TEMPLATE")},
-		
-		{
-			type = "range",
-			get = function() return CrossGamble.db.roll_time or 25 end,
-			set = function (self, fixedparam, value)
-				CrossGamble.db.roll_time = value
-			end,
-			min = 15,
-			max = 60,
-			step = 1,
-			name = "Roll Time",
-			
-		},
 	}
 	
 	local options_text_template = CrossGamble:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE")
