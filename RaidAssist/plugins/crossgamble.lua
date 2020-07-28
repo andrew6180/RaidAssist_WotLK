@@ -213,8 +213,8 @@ function CrossGamble.BuildFrame()
             CrossGamble:StartRoll()
         end
     end
-    local ebutton = CrossGamble:CreateButton(frame, end_button_func, 100, 20, "End CrossGamble", _, _, _, "ebutton", _, _, CrossGamble:GetTemplate("button", "OPTIONS_BUTTON_TEMPLATE"), CrossGamble:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
-    local cbutton = CrossGamble:CreateButton(frame, CrossGamble.CancelRoll, 100, 20, "Cancel CrossGamble", _, _, _, "cbutton", _, _, CrossGamble:GetTemplate("button", "OPTIONS_BUTTON_TEMPLATE"), CrossGamble:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
+    local ebutton = CrossGamble:CreateButton(frame, end_button_func, 100, 20, "End CrossGamble", _, _, _, "ebutton")
+    local cbutton = CrossGamble:CreateButton(frame, CrossGamble.CancelRoll, 100, 20, "Cancel CrossGamble", _, _, _, "cbutton")
 
     ebutton:SetPoint("bottomleft", frame, "bottomleft", 0, 0)
     cbutton:SetPoint("bottomleft", frame, "bottomleft", 102, 0)

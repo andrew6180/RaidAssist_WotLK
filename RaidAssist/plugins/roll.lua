@@ -160,8 +160,8 @@ function Roll.BuildFrame()
 		Cross:Hide()
         tinsert (Roll.PlayerList, Cross)
     end
-    local ebutton = Roll:CreateButton(frame, Roll.EndRollEarly, 100, 20, "End Roll", _, _, _, "ebutton", _, _, Roll:GetTemplate("button", "OPTIONS_BUTTON_TEMPLATE"), Roll:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
-    local cbutton = Roll:CreateButton(frame, Roll.CancelRoll, 100, 20, "Cancel Roll", _, _, _, "cbutton", _, _, Roll:GetTemplate("button", "OPTIONS_BUTTON_TEMPLATE"), Roll:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
+    local ebutton = Roll:CreateButton(frame, Roll.EndRollEarly, 100, 20, "End Roll", _, _, _, "ebutton")
+    local cbutton = Roll:CreateButton(frame, Roll.CancelRoll, 100, 20, "Cancel Roll", _, _, _, "cbutton")
 
     ebutton:SetPoint("bottomleft", frame, "bottomleft", 0, 0)
     cbutton:SetPoint("bottomleft", frame, "bottomleft", 102, 0)
