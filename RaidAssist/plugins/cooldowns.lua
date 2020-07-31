@@ -221,6 +221,9 @@ function Cooldowns:COMBAT_LOG_EVENT_UNFILTERED(self, time, event, who_guid, who_
 	if event == "SPELL_CAST_FAILED" or event == "SPELL_AURA_REMOVED" then -- not sure if this is everything to be filtered out but we'll see.
 		return 
 	end
+	if spellid == 48477 and event ~= "SPELL_RESURRECT" then
+		return
+	end
 	if who_name and who_name ~= "" and who_guid and spellid then
 		Cooldowns.HandleSpellCast (event, who_name, who_guid, spellid)
 	end
@@ -683,6 +686,7 @@ local setup_player_bar = function (self, panel, player, spell, bar_index)
 			self:CancelTimerBar()
 			--> if the spell has charges, set it to full
 			self:SetValue(100)
+			self.statusbar:SetWidth(panel:GetWidth())
 		end
 		self.player_spellid = player_spellid
 	end
@@ -1131,6 +1135,7 @@ function Cooldowns:CooldownReady (param)
 			local bar = panel:GetBar (Cooldowns.GetPlayerSpellId (player, spell))
 			if (bar) then
 				bar:SetValue(100)
+				bar.statusbar:SetWidth(panel:GetWidth())
 				Cooldowns.SetBarRightText (bar, spell.charges_amt)
 			end
 		end
