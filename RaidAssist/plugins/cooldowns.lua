@@ -205,6 +205,9 @@ local CDTalents = {
 	},
 }
 
+local current_editing_panel
+local current_editing_index
+
 local get_unit_name = function (unitid)
 	local name = GetUnitName (unitid, true)
 	if (name) then
@@ -1337,8 +1340,8 @@ function Cooldowns.BuildOptions (frame)
 
 	Cooldowns.CheckIfNoPanel()
 
-	local current_editing_panel = Cooldowns.db.cooldowns_panels [1]
-	local current_editing_index = 1
+	current_editing_panel = Cooldowns.db.cooldowns_panels [1]
+	current_editing_index = 1
 	
 	--> panel dropdown
 	local label_cooldown_panel = Cooldowns:CreateLabel (main_frame, "Cooldown Panel:", Cooldowns:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
@@ -1347,6 +1350,9 @@ function Cooldowns.BuildOptions (frame)
 		CooldownsOptionsHolder1:RefreshOptions()
 		main_frame:RefreshOptions()
 		Cooldowns.CheckForShowPanels ("PANEL_OPTIONS_UPDATE")
+		for spellid, checkbox in pairs(main_frame.cd_checkboxes) do 
+			checkbox:SetValue (current_editing_panel.cooldowns_enabled[spellid])
+		end
 	end
 	
 	function Cooldowns.SelectPanel (self, fixed_value, selected_value)
@@ -1596,7 +1602,6 @@ function Cooldowns.BuildOptions (frame)
 			name = "Texture",
 		},
 
---[
 		{
 			type = "toggle",
 			get = function() return Cooldowns.db.bar_class_color end,
@@ -1623,21 +1628,19 @@ function Cooldowns.BuildOptions (frame)
 
 	}
 	
-	RA:BuildMenu (main_frame, options_list, 0, -110, 500, true, options_text_template, options_dropdown_template, options_switch_template, true, options_slider_template, options_button_template)
-	
 	--> refresh widgets
 	function Cooldowns.RefreshMainDropdown()
 		dropdown_cooldown_panel:Select (current_editing_index, true)
 	end
 	Cooldowns.RefreshMainDropdown()
 	
----------- Cooldowns -----------
--- ~cooldowns ~list
-DF_COOLDOWN_OFFENSIVE = 1
-DF_COOLDOWN_PERSONAL = 2
-DF_COOLDOWN_EXTERNAL = 3
-DF_COOLDOWN_RAID = 4
-DF_COOLDOWN_UTILITY = 5
+	---------- Cooldowns -----------
+	-- ~cooldowns ~list
+	DF_COOLDOWN_OFFENSIVE = 1
+	DF_COOLDOWN_PERSONAL = 2
+	DF_COOLDOWN_EXTERNAL = 3
+	DF_COOLDOWN_RAID = 4
+	DF_COOLDOWN_UTILITY = 5
 
 	local cooldowns_offensive = {}
 	local cooldowns_personal = {}
@@ -1717,6 +1720,8 @@ DF_COOLDOWN_UTILITY = 5
 	label_external_cooldowns:SetPoint ("topleft", main_frame, "topleft", 10+x+180, -0)
 	label_raid_cooldowns:SetPoint ("topleft", main_frame, "topleft", 10+x+180+180, -0)
 
+	main_frame.cd_checkboxes = {}
+
 	--personal cooldowns
 	
 	for _, spellTable in ipairs (cooldowns_personal) do
@@ -1746,12 +1751,19 @@ DF_COOLDOWN_UTILITY = 5
 			background:SetScript ("OnLeave", on_leave)
 			background.spellid = spellid
 		
-			local func = function (self, fixedparam, value) current_editing_panel.cooldowns_enabled [spellid] = value; Cooldowns.BarControl ("roster_update") end
+			local func = function (self, fixedparam, value) 
+				current_editing_panel.cooldowns_enabled [spellid] = value;
+				 Cooldowns.BarControl ("roster_update"); 
+				 for i, panel in ipairs(Cooldowns.db.cooldowns_panels) do 
+					print(i, panel.cooldowns_enabled[spellid])
+				 end
+				end
 			local checkbox, label = Cooldowns:CreateSwitch (main_frame, func, current_editing_panel.cooldowns_enabled [spellid], 64, 64, _, _, _, "CooldownsDropdown" .. spellid .. "External", _, nil, nil, "|T" .. spellicon .. ":14:14:0:0:64:64:5:59:5:59|t " .. spellname, Cooldowns:GetTemplate ("switch", "OPTIONS_CHECKBOX_TEMPLATE"), Cooldowns:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
 			checkbox:SetAsCheckBox()
 			checkbox.tooltip = format (L["S_PLUGIN_COOLDOWNS_SPELLNAME"], spellname)
 			checkbox:ClearAllPoints(); label:ClearAllPoints()
 			checkbox:SetFrameLevel (frame_level+2)
+			main_frame.cd_checkboxes[spellid] = checkbox
 			
 			background:SetPoint ("topleft", main_frame, "topleft", 5+x, -20 + ((index-1) * -20))
 			label:SetPoint ("topleft", main_frame, "topleft", 10+x, -23 + ((index-1) * -20))
@@ -1798,6 +1810,7 @@ DF_COOLDOWN_UTILITY = 5
 			checkbox.tooltip = format (L["S_PLUGIN_COOLDOWNS_SPELLNAME"], spellname)
 			checkbox:ClearAllPoints(); label:ClearAllPoints()
 			checkbox:SetFrameLevel (frame_level+2)
+			main_frame.cd_checkboxes[spellid] = checkbox
 			
 			background:SetPoint ("topleft", main_frame, "topleft", 5+x, -20 + ((index-1) * -20))
 			label:SetPoint ("topleft", main_frame, "topleft", 10+x, -23 + ((index-1) * -20))
@@ -1849,6 +1862,7 @@ DF_COOLDOWN_UTILITY = 5
 			checkbox.tooltip = format (L["S_PLUGIN_COOLDOWNS_SPELLNAME"], spellname)
 			checkbox:ClearAllPoints(); label:ClearAllPoints()
 			checkbox:SetFrameLevel (frame_level+2)
+			main_frame.cd_checkboxes[spellid] = checkbox
 			
 			background:SetPoint ("topleft", main_frame, "topleft", 5+x, y + ((index-1) * -20))
 			label:SetPoint ("topleft", main_frame, "topleft", 10+x, y + ((index-1) * -20))
@@ -1894,6 +1908,7 @@ DF_COOLDOWN_UTILITY = 5
 			checkbox.tooltip = format (L["S_PLUGIN_COOLDOWNS_SPELLNAME"], spellname)
 			checkbox:ClearAllPoints(); label:ClearAllPoints()
 			checkbox:SetFrameLevel (frame_level+2)
+			main_frame.cd_checkboxes[spellid] = checkbox
 			
 			background:SetPoint ("topleft", main_frame, "topleft", 5+x, -20 + ((index-1) * -20))
 			label:SetPoint ("topleft", main_frame, "topleft", 10+x, -23 + ((index-1) * -20))
@@ -1945,6 +1960,7 @@ DF_COOLDOWN_UTILITY = 5
 			checkbox.tooltip = format (L["S_PLUGIN_COOLDOWNS_SPELLNAME"], spellname)
 			checkbox:ClearAllPoints(); label:ClearAllPoints()
 			checkbox:SetFrameLevel (frame_level+2)
+			main_frame.cd_checkboxes[spellid] = checkbox
 			
 			background:SetPoint ("topleft", main_frame, "topleft", 5+x, y + ((index-1) * -20))
 			label:SetPoint ("topleft", main_frame, "topleft", 10+x, y + ((index-1) * -20))
@@ -1953,7 +1969,7 @@ DF_COOLDOWN_UTILITY = 5
 			index = index + 1
 		end
 	end
-
+	RA:BuildMenu (main_frame, options_list, 0, -110, 500, true, options_text_template, options_dropdown_template, options_switch_template, true, options_slider_template, options_button_template)
 	main_frame:Show()
 end
 
