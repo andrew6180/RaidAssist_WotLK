@@ -682,7 +682,7 @@ local setup_player_bar = function (self, panel, player, spell, bar_index)
 		else
 			self:CancelTimerBar()
 			--> if the spell has charges, set it to full
-			self.value = 100
+			self:SetValue(100)
 		end
 		self.player_spellid = player_spellid
 	end
@@ -1130,7 +1130,7 @@ function Cooldowns:CooldownReady (param)
 		if (panel.Spells [spell.spellid]) then --> this panel is allowed to show this spell
 			local bar = panel:GetBar (Cooldowns.GetPlayerSpellId (player, spell))
 			if (bar) then
-				bar.value = 100
+				bar:SetValue(100)
 				Cooldowns.SetBarRightText (bar, spell.charges_amt)
 			end
 		end
@@ -1754,9 +1754,6 @@ function Cooldowns.BuildOptions (frame)
 			local func = function (self, fixedparam, value) 
 				current_editing_panel.cooldowns_enabled [spellid] = value;
 				 Cooldowns.BarControl ("roster_update"); 
-				 for i, panel in ipairs(Cooldowns.db.cooldowns_panels) do 
-					print(i, panel.cooldowns_enabled[spellid])
-				 end
 				end
 			local checkbox, label = Cooldowns:CreateSwitch (main_frame, func, current_editing_panel.cooldowns_enabled [spellid], 64, 64, _, _, _, "CooldownsDropdown" .. spellid .. "External", _, nil, nil, "|T" .. spellicon .. ":14:14:0:0:64:64:5:59:5:59|t " .. spellname, Cooldowns:GetTemplate ("switch", "OPTIONS_CHECKBOX_TEMPLATE"), Cooldowns:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
 			checkbox:SetAsCheckBox()
