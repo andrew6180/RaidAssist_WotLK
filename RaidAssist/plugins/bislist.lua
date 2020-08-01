@@ -461,6 +461,7 @@ function BisList.BuildOptions (frame)
 				local item_id = itemlist [index]
 				item_id = tonumber(item_id)
 				if (item_id and item_id > 0) then
+					GameTooltip:SetHyperlink("item:"..item_id) -- get item info first
 					local itemName, itemLink, _, itemLevel, _, _, _, _, _, itemTexture = GetItemInfo (item_id)
 					
 					if (not itemName) then
