@@ -77,7 +77,7 @@ local function comma_value(amount)
     return formatted
 end
 
-
+local guild_only = false
 
 CrossGamble.OnEnable = function (plugin)
 	CrossGamble.activeRoll = {
@@ -95,8 +95,13 @@ CrossGamble.OnEnable = function (plugin)
     CrossGamble:RegisterEvent("CHAT_MSG_PARTY", CrossGamble.CHAT_MSG)
     CrossGamble:RegisterEvent("CHAT_MSG_RAID_LEADER", CrossGamble.CHAT_MSG)
     CrossGamble:RegisterEvent("CHAT_MSG_PARTY_LEADER", CrossGamble.CHAT_MSG)
-
+    SLASH_CrossGambleGuild1 = "/cgg"
     SLASH_CrossGamble1 = "/cg"
+
+    function SlashCmdList.CrossGambleGuild (msg, editbox)
+        guild_only = true
+        SlashCmdList.CrossGamble(msg, editbox)
+    end
 
     function SlashCmdList.CrossGamble (msg, editbox)
         cap = tonumber(msg)
@@ -210,6 +215,7 @@ function CrossGamble.BuildFrame()
         if CrossGamble.activeRoll.rolling then 
             CrossGamble:EndRollEarly()
         elseif CrossGamble.activeRoll.acceptingPlayers then 
+
             CrossGamble:StartRoll()
         end
     end
@@ -349,7 +355,10 @@ end
 function CrossGamble:Say(msg, loud)
     local channel = nil
         
-        if IsInRaid() then
+        if guild_only then 
+            channel = "GUILD"
+            
+        elseif IsInRaid() then
             if IsRaidOfficer() and loud then
                 channel = "RAID_WARNING"
             else
