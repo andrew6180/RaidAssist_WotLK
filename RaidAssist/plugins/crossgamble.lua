@@ -95,6 +95,7 @@ CrossGamble.OnEnable = function (plugin)
     CrossGamble:RegisterEvent("CHAT_MSG_PARTY", CrossGamble.CHAT_MSG)
     CrossGamble:RegisterEvent("CHAT_MSG_RAID_LEADER", CrossGamble.CHAT_MSG)
     CrossGamble:RegisterEvent("CHAT_MSG_PARTY_LEADER", CrossGamble.CHAT_MSG)
+    CrossGamble:RegisterEvent("CHAT_MSG_GUILD", CrossGamble.CHAT_MSG)
     SLASH_CrossGambleGuild1 = "/cgg"
     SLASH_CrossGamble1 = "/cg"
 
@@ -159,6 +160,7 @@ CrossGamble.OnDisable = function (plugin)
     CrossGamble:UnregisterEvent("CHAT_MSG_PARTY", CrossGamble.CHAT_MSG)
     CrossGamble:UnregisterEvent("CHAT_MSG_RAID_LEADER", CrossGamble.CHAT_MSG)
     CrossGamble:UnregisterEvent("CHAT_MSG_PARTY_LEADER", CrossGamble.CHAT_MSG)
+    CrossGamble:UnregisterEvent("CHAT_MSG_GUILD", CrossGamble.CHAT_MSG)
     SLASH_CrossGamble1 = nil
 end
 
@@ -357,7 +359,7 @@ function CrossGamble:Say(msg, loud)
         
         if guild_only then 
             channel = "GUILD"
-            
+
         elseif IsInRaid() then
             if IsRaidOfficer() and loud then
                 channel = "RAID_WARNING"
@@ -506,6 +508,7 @@ end
 
 
 function CrossGamble:FinalizeRoll()
+    guild_only = false
     C_Timer.After(2, function() CrossGamble.Panel:Hide() end)
     CrossGamble.activeRoll.timers = {}
     CrossGamble.activeRoll.rolls = {}
