@@ -409,15 +409,17 @@ end
 local finished_func = function()
 	if (ReadyCheck.ScreenPanel) then
 		ReadyCheck.ScreenPanel:SetScript ("OnUpdate", nil)
+		ReadyCheck.AnswerTable = nil
+		ReadyCheck.From.player = nil
 		if (ReadyCheck.ScreenPanel:IsShown()) then
 			ReadyCheck.ProgressBar:SetTimer (0)
-			C_Timer.After (4, hide_screen_panel)
+			C_Timer.After (3, hide_screen_panel)
 		end
 	end
 end
 
 function ReadyCheck:READY_CHECK_FINISHED (event, arg2, arg3)
-	if (ReadyCheck.AnswerTable) == nil then 
+	if (ReadyCheck.AnswerTable) == nil or ReadyCheck.From.player == nil then 
 		return
 	end
 	if ReadyCheck.From.player == UnitName("player") then 
@@ -473,7 +475,7 @@ local install_status = RA:InstallPlugin ("Ready Check", "RAReadyCheck", ReadyChe
 
 
 function ReadyCheck.OnReceiveComm (prefix, sourcePluginVersion, player, status)
-	if UnitIsGroupLeader("player") or player == UnitName("player") then 
+	if UnitIsGroupLeader("player") or player == UnitName("player") or player == nil then 
 		return 
 	end
 	if (prefix == COMM_READY_CHECK) then 
